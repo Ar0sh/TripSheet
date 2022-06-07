@@ -1,0 +1,154 @@
+﻿<Window x:Class="TripSheet_SQLite.TripSheet"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TripSheet_SQLite"
+        mc:Ignorable="d"
+        Title="Trip Sheet" Height="500" Width="1280" MinWidth="1280" MinHeight="250"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <SolidColorBrush x:Key="CEcolor" Color="#FF9BF99B"/>
+        <local:DateConverter x:Key="dateConverter"/>
+    </Window.Resources>
+    <Grid Margin="0,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="900"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition MinWidth="250"/>
+        </Grid.ColumnDefinitions>
+        <DataGrid x:Name="dgTripData"
+                        Grid.Column="0"
+                        ItemsSource="{Binding New_TripSheetInput}"
+                        SelectedItem="{Binding SelectedItem, ElementName=dgTripData, Mode=TwoWay}"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="True"
+                        CanUserSortColumns="False"
+                        AutoGenerateColumns="False"
+                        SelectionUnit="Cell"
+                        PreviewKeyDown="DgTripData_PreviewKeyDown"
+                        PreviewTextInput="DgTripData_PreviewTextInput"
+                        IsSynchronizedWithCurrentItem="True"
+                        AlternatingRowBackground="#7F02BC94"
+                        FontWeight="Normal" Margin="10,70,5,10">
+            <DataGrid.Resources>
+                <Style x:Key="tbStyle" TargetType="{x:Type TextBlock}">
+                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                </Style>
+                <Style x:Key="errorStyle" TargetType="{x:Type TextBox}">
+                    <Setter Property="Padding" Value="-2"/>
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="Background" Value="Red"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="ToolTip" 
+                                            Value="{Binding RelativeSource={RelativeSource Self},
+                                            Path=(Validation.Errors)[0].ErrorContent}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="colTime" Width="150" Header="Time" IsReadOnly="True" Binding="{Binding Time, Converter={StaticResource dateConverter}}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="Timestamp" />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)" 
+                                                EditingElementStyle="{StaticResource errorStyle}" ElementStyle="{StaticResource tbStyle}"
+                                                Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat='0.00'}">
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colTripVol" Width="100" Header="Trip Vol.(m³)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, StringFormat='0.00'}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="Enter volume added/removed to/from trip volume." />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding ActualVolume, StringFormat='0.00 m³'}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="Actual volume change between rows." />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colTheoretical_OE" Width="70" Header="Theor. Vol." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_OE, StringFormat='0.00 m³'}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="{StaticResource CEcolor}" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="ToolTip" Value="Theoretical volume change between rows." />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colTheoretical_CE" Width="70" Header="Theor. Vol." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_CE, StringFormat='0.00 m³'}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="{StaticResource CEcolor}" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="ToolTip" Value="Theoretical volume change between rows." />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colDiff_OE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_OE, StringFormat='0.00 m³'}"/>
+                <DataGridTextColumn x:Name="colDiff_CE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_CE, StringFormat='0.00 m³'}"/>
+                <DataGridTextColumn x:Name="colCumDiff_OE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_OE, StringFormat='0.00 m³'}"/>
+                <DataGridTextColumn x:Name="colCumDiff_CE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_CE, StringFormat='0.00 m³'}"/>
+                <DataGridTextColumn x:Name="colLossGain_OE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_OE, StringFormat='0.00 m³/hr'}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="Gain/Loss between station." />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colLossGain_CE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_CE, StringFormat='0.00 m³/hr'}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="Gain/Loss between station." />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="ID" Width="20" Binding="{Binding Id}" IsReadOnly="True" Visibility="Collapsed"/>
+                <DataGridTextColumn Header="PipeID" Width="20" Binding="{Binding PipeId}" IsReadOnly="True" Visibility="Collapsed"/>
+            </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Copy" Command="Copy"/>
+                    <MenuItem Header="Paste" Command="Paste"/>
+                    <MenuItem Header="Cut" Command="Cut"/>
+                    <Span/>
+                    <MenuItem Header="Delete" Click="Delete_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+        <Button x:Name="btnNewLine" Grid.Column="0" Content="New line" Height="25" Margin="0,40,5,0" VerticalAlignment="Top" Click="BtnNewLine_Click" HorizontalAlignment="Right" Width="80"/>
+        <ComboBox x:Name="cbPipe" Grid.Column="0" Height="25" Margin="184,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbPipe_SelectionChanged"
+                  ItemsSource="{Binding pipeList}"
+                  DisplayMemberPath="Name"/>
+        <ComboBox x:Name="cbCsg" Grid.Column="0" Height="25" Margin="184,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbCsg_SelectionChanged"
+            ItemsSource="{Binding csgList}"
+            DisplayMemberPath="Name"/>
+        <Button x:Name="btnAddPipe" Grid.Column="0" Content="Add Pipe Info" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddPipe_Click" Height="25"/>
+        <Button x:Name="btnAddCsg" Grid.Column="0" Content="Add Csg Info" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddCsg_Click" Height="25"/>
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
+        <WpfPlot Name="TripPlot" Grid.Column="2" MouseMove="TripPlot_MouseMove" Margin="5,10,10,78" />
+        <CheckBox x:Name="tbTimeBased" Grid.Column="0" Checked="TbTimeBased_Checked" Unchecked="TbTimeBased_Checked" Content="Time plot" Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
+        <Label Content="OE Disp:" HorizontalAlignment="Left" Margin="373,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="CE Disp:" HorizontalAlignment="Left" Margin="373,39,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbOE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,10,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="tbCE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,39,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
+        <RadioButton x:Name="RbOE" Content="Open Ended" Checked="RbOpenEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,10,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton x:Name="RbCE" Content="Closed Ended" Checked="RbCloseEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,40,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton x:Name="RbPipe" Content="Pipe" Checked="RbPipe_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,10,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton x:Name="RbCsg" Content="Casing" Checked="RbCsg_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,40,0,0" VerticalAlignment="Top" Height="25"/>
+        <Label x:Name="lbMouseover1" Grid.Column="2" Content="Primary: " Margin="5,0,10,36" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="lbMouseover2" Grid.Column="2" Content="Secondary: " Margin="5,0,10,10" Height="26" VerticalAlignment="Bottom"/>
+        <Label Content="l/m" HorizontalAlignment="Left" Margin="547,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="l/m" HorizontalAlignment="Left" Margin="547,39,0,0" VerticalAlignment="Top"/>
+    </Grid>
+</Window>

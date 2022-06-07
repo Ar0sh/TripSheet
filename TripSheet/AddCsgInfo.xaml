@@ -1,0 +1,71 @@
+﻿<Window x:Class="TripSheet_SQLite.AddCsgInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TripSheet_SQLite"
+        mc:Ignorable="d"
+        Title="Add Casing Info" Height="449.451" Width="741.484" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Label Content="Open End Displacement:" HorizontalAlignment="Left" Height="26" Margin="10,72,0,0" VerticalAlignment="Top"/>
+        <Label Content="Closed End Displacement:" HorizontalAlignment="Left" Height="26" Margin="10,41,0,0" VerticalAlignment="Top"/>
+        <Label Content="Name:" HorizontalAlignment="Left" Height="26" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="Details:" HorizontalAlignment="Left" Height="26" Margin="10,103,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtName" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="188,10,0,0" TextWrapping="Wrap" 
+                 VerticalAlignment="Top" Width="220" PreviewKeyUp="TxtDetails_PreviewKeyUp"/>
+        <TextBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="188,41,0,0" TextWrapping="Wrap" 
+                 x:Name="txtCE" VerticalAlignment="Top" Width="220" PreviewKeyUp="TxtDetails_PreviewKeyUp" PreviewTextInput="TxtOE_PreviewTextInput" MaxLength="5"/>
+        <TextBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="188,72,0,0" TextWrapping="Wrap" 
+                 x:Name="txtOE" VerticalAlignment="Top" Width="220" PreviewKeyUp="TxtDetails_PreviewKeyUp" PreviewTextInput="TxtOE_PreviewTextInput" MaxLength="5"/>
+        <TextBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="188,103,0,0" TextWrapping="Wrap" 
+                 x:Name="txtDetails" VerticalAlignment="Top" Width="220" PreviewKeyUp="TxtDetails_PreviewKeyUp"/>
+        <Button x:Name="btnSavePipe" Content="Add" HorizontalAlignment="Left" Margin="188,138,0,0" VerticalAlignment="Top" Width="220"
+                Click="BtnSavePipe_Click" Height="26"/>
+        <DataGrid x:Name="dgCsgData"
+                      ItemsSource="{Binding New_CsgData}"
+                      SelectedItem="{Binding SelectedItem, ElementName=dgCsgData, Mode=TwoWay}"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="True"
+                      CanUserSortColumns="False"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionUnit="Cell"
+                      IsSynchronizedWithCurrentItem="True"
+                      AlternatingRowBackground="#7F02BC94"
+                      FontWeight="Normal" Margin="0,169,0,0">
+            <DataGrid.Resources>
+                <Style x:Key="errorStyle" TargetType="{x:Type TextBox}">
+                    <Setter Property="Padding" Value="-2"/>
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="Background" Value="Red"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="ToolTip" 
+                                            Value="{Binding RelativeSource={RelativeSource Self},
+                                            Path=(Validation.Errors)[0].ErrorContent}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="colName" Width="100" Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn x:Name="colCEDisp" Width="*" Header="CE Disp." Binding="{Binding CEDisplacement, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colOEDisp" Width="*" Header="OE Disp." Binding="{Binding OEDisplacement, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colInfo" Width="*" Header="Info" Binding="{Binding Details}"/>
+                <DataGridTextColumn Header="ID" Width="20" Binding="{Binding Id}" IsReadOnly="True" Visibility="Collapsed"/>
+            </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Copy" Command="Copy"/>
+                    <MenuItem Header="Paste" Command="Paste"/>
+                    <MenuItem Header="Delete" Click="Delete_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+        <Button x:Name="btnClose" Content="Close" Margin="0,138,10,0" VerticalAlignment="Top"
+            Click="BtnClose_Click" Height="26" HorizontalAlignment="Right" Width="120"/>
+        <Label x:Name="lbNameErr" Foreground="Red" HorizontalAlignment="Left" Margin="413,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lbCEErr" Foreground="Red" HorizontalAlignment="Left" Margin="413,41,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lbOEErr" Foreground="Red" HorizontalAlignment="Left" Margin="413,72,0,0" VerticalAlignment="Top"/>
+    </Grid>
+</Window>
