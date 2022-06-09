@@ -57,24 +57,7 @@ namespace TripSheet_SQLite
         
         public Startup()
         {
-            string[] arr = StartBoard();
             InitializeComponent();
-        }
-
-        private string[] StartBoard()
-        {
-            string[] _ = new string[]
-            {
-                "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "",
-                "", "", "", "o", "x", "", "", "",
-                "", "", "", "x", "o", "", "", "",
-                "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "",
-            };
-            return _;
         }
 
         /// <summary>

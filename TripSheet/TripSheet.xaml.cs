@@ -20,6 +20,7 @@ namespace TripSheet_SQLite
     public partial class TripSheet : Window
     {
         public static TripSheetModel tripSheetModel = new TripSheetModel();
+        readonly Volumes volumes = new Volumes();
         // Data context
         //public static string connectionString;
         //public static TripSheetModel tripSheetModel;
@@ -79,6 +80,7 @@ namespace TripSheet_SQLite
             TripPlot.Configuration.DoubleClickBenchmark = false;
             TripPlot.RightClicked -= TripPlot.DefaultRightClickEvent;
             TripPlot.RightClicked += CustomRightClickMenu;
+            TripPlot.Plot.YAxis.TickLabelNotation(invertSign: true);
             dgTripData.Items.Clear();
             DataContext = this;
             New_TripSheetInput = new ObservableCollection<TripSheetData>();
@@ -202,25 +204,25 @@ namespace TripSheet_SQLite
 
         private void EnterTripData(TripSheetData newItem, TripSheetData tripSheetData, bool zero = false)
         {
-            newItem.Id = zero == false ? tripSheetData.Id : Guid.NewGuid().ToString();
-            newItem.Time = zero == false ? tripSheetData.Time : DateTimeOffset.Now.ToUnixTimeSeconds();
-            newItem.ActualVolume = zero == false ? tripSheetData.ActualVolume : 0.00M;
-            newItem.TripVolume = zero == false ? tripSheetData.TripVolume : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("TRIPPVT")), 2);
-            newItem.BDepth = zero == false ? tripSheetData.BDepth : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("BITDEP")), 2);
-            newItem.Diff_OE = zero == false ? tripSheetData.Diff_OE : 0.00M;
-            newItem.Diff_CE = zero == false ? tripSheetData.Diff_CE : 0.00M;
-            newItem.TotDiff_OE = zero == false ? tripSheetData.TotDiff_OE : 0.00M;
-            newItem.TotDiff_CE = zero == false ? tripSheetData.TotDiff_CE : 0.00M;
-            newItem.TheoreticalVol_OE = zero == false ? tripSheetData.TheoreticalVol_OE : 0.00M;
-            newItem.TheoreticalVol_CE = zero == false ? tripSheetData.TheoreticalVol_CE : 0.00M;
-            newItem.EmptyFill = zero == false ? tripSheetData.EmptyFill : 0;
-            newItem.Displacement_OE = zero == false ? tripSheetData.Displacement_OE : null;
-            newItem.Displacement_CE = zero == false ? tripSheetData.Displacement_CE : null;
-            newItem.SheetId = zero == false ? tripSheetData.SheetId : SheetGuid;
-            newItem.PipeId = zero == false ? tripSheetData.PipeId : PipeGuid;
-            newItem.TimeDiffMin = zero == false ? tripSheetData.TimeDiffMin : null;
-            newItem.LossGainRate_OE = zero == false ? tripSheetData.LossGainRate_OE : null;
-            newItem.LossGainRate_CE = zero == false ? tripSheetData.LossGainRate_CE : null;
+            newItem.Id                  = zero == false ? tripSheetData.Id : Guid.NewGuid().ToString();
+            newItem.Time                = zero == false ? tripSheetData.Time : DateTimeOffset.Now.ToUnixTimeSeconds();
+            newItem.ActualVolume        = zero == false ? tripSheetData.ActualVolume : 0.00M;
+            newItem.TripVolume          = zero == false ? tripSheetData.TripVolume : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("TRIPPVT")), 2);
+            newItem.BDepth              = zero == false ? tripSheetData.BDepth : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("BITDEP")), 2);
+            newItem.Diff_OE             = zero == false ? tripSheetData.Diff_OE : 0.00M;
+            newItem.Diff_CE             = zero == false ? tripSheetData.Diff_CE : 0.00M;
+            newItem.TotDiff_OE          = zero == false ? tripSheetData.TotDiff_OE : 0.00M;
+            newItem.TotDiff_CE          = zero == false ? tripSheetData.TotDiff_CE : 0.00M;
+            newItem.TheoreticalVol_OE   = zero == false ? tripSheetData.TheoreticalVol_OE : 0.00M;
+            newItem.TheoreticalVol_CE   = zero == false ? tripSheetData.TheoreticalVol_CE : 0.00M;
+            newItem.EmptyFill           = zero == false ? tripSheetData.EmptyFill : 0;
+            newItem.Displacement_OE     = zero == false ? tripSheetData.Displacement_OE : null;
+            newItem.Displacement_CE     = zero == false ? tripSheetData.Displacement_CE : null;
+            newItem.SheetId             = zero == false ? tripSheetData.SheetId : SheetGuid;
+            newItem.PipeId              = zero == false ? tripSheetData.PipeId : PipeGuid;
+            newItem.TimeDiffMin         = zero == false ? tripSheetData.TimeDiffMin : null;
+            newItem.LossGainRate_OE     = zero == false ? tripSheetData.LossGainRate_OE : null;
+            newItem.LossGainRate_CE     = zero == false ? tripSheetData.LossGainRate_CE : null;
         }
 
         private void UpdateSheet()
@@ -235,37 +237,37 @@ namespace TripSheet_SQLite
             {
                 if (tbefore == null && tnew.Id == null)
                 {
-                    tnew.SheetId = SheetGuid;
-                    tnew.PipeId = PipeGuid;
-                    tnew.EmptyFill = 0;
-                    tnew.Displacement_OE = Convert.ToDecimal(tbOE.Text);
-                    tnew.Displacement_CE = Convert.ToDecimal(tbCE.Text);
-                    tnew.ActualVolume = tnew.TripVolume;
-                    tnew.TheoreticalVol_OE = tnew.TripVolume;
-                    tnew.TheoreticalVol_CE = tnew.TripVolume;
-                    tnew.Diff_OE = 0.00M;
-                    tnew.Diff_CE = 0.00M;
-                    tnew.TotDiff_OE = 0.00M;
-                    tnew.TotDiff_CE = 0.00M;
+                    tnew.SheetId            = SheetGuid;
+                    tnew.PipeId             = PipeGuid;
+                    tnew.EmptyFill          = 0;
+                    tnew.Displacement_OE    = Convert.ToDecimal(tbOE.Text);
+                    tnew.Displacement_CE    = Convert.ToDecimal(tbCE.Text);
+                    tnew.ActualVolume       = tnew.TripVolume;
+                    tnew.TheoreticalVol_OE  = tnew.TripVolume;
+                    tnew.TheoreticalVol_CE  = tnew.TripVolume;
+                    tnew.Diff_OE            = 0.00M;
+                    tnew.Diff_CE            = 0.00M;
+                    tnew.TotDiff_OE         = 0.00M;
+                    tnew.TotDiff_CE         = 0.00M;
                     Startup.tripSheetModel.TripSheetData.Add(tnew);
                 }
                 if (tnew.Id == null && tnew.TripVolume != null && tnew.BDepth != 0 && tbefore != null)
                 {
-                    tnew.Id = Guid.NewGuid().ToString();
-                    tnew.SheetId = SheetGuid;
-                    tnew.PipeId = PipeGuid;
-                    tnew.Displacement_OE = Convert.ToDecimal(tbOE.Text);
-                    tnew.Displacement_CE = Convert.ToDecimal(tbCE.Text);
-                    tnew.ActualVolume = Volumes.ActualVolume(tnew.TripVolume, tbefore.TripVolume, tnew.EmptyFill);
-                    tnew.TheoreticalVol_OE = Volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbOE.Text));
-                    tnew.TheoreticalVol_CE = Volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbCE.Text));
-                    tnew.Diff_OE = tnew.ActualVolume - tnew.TheoreticalVol_OE;
-                    tnew.Diff_CE = tnew.ActualVolume - tnew.TheoreticalVol_CE;
-                    tnew.TotDiff_OE = tbefore.TotDiff_OE + tnew.Diff_OE;
-                    tnew.TotDiff_CE = tbefore.TotDiff_CE + tnew.Diff_CE;
-                    tnew.TimeDiffMin = (int)(tnew.Time - tbefore.Time);
-                    tnew.LossGainRate_OE = (tnew.Diff_OE / tnew.TimeDiffMin) * 60 * 60;
-                    tnew.LossGainRate_CE = (tnew.Diff_CE / tnew.TimeDiffMin) * 60 * 60;
+                    tnew.Id                 = Guid.NewGuid().ToString();
+                    tnew.SheetId            = SheetGuid;
+                    tnew.PipeId             = PipeGuid;
+                    tnew.Displacement_OE    = Convert.ToDecimal(tbOE.Text);
+                    tnew.Displacement_CE    = Convert.ToDecimal(tbCE.Text);
+                    tnew.ActualVolume       = volumes.ActualVolume(tnew.TripVolume, tbefore.TripVolume, tnew.EmptyFill);
+                    tnew.TheoreticalVol_OE  = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbOE.Text));
+                    tnew.TheoreticalVol_CE  = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbCE.Text));
+                    tnew.Diff_OE            = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_OE);
+                    tnew.Diff_CE            = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_CE);
+                    tnew.TotDiff_OE         = volumes.Addition(tbefore.TotDiff_OE, tnew.Diff_OE);
+                    tnew.TotDiff_CE         = volumes.Addition(tbefore.TotDiff_CE, tnew.Diff_CE);
+                    tnew.TimeDiffMin        = (int)(tnew.Time - tbefore.Time);
+                    tnew.LossGainRate_OE    = volumes.GainLossTime(tnew.Diff_OE, tnew.TimeDiffMin);
+                    tnew.LossGainRate_CE    = volumes.GainLossTime(tnew.Diff_CE, tnew.TimeDiffMin);
                     Startup.tripSheetModel.TripSheetData.Add(tnew);
                 }
                 else if (tnew.BDepth == 0)
@@ -292,21 +294,21 @@ namespace TripSheet_SQLite
                 var editItem = Startup.tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
                 if (list_tripSheetData[i].Id != "" && list_tripSheetData[i].Id != null && editItem != null)
                 {
-                    if (list_tripSheetData[i].TripVolume != null &&
-                        (list_tripSheetData[i].TripVolume != editItem.TripVolume ||
-                        list_tripSheetData[i].EmptyFill != editItem.EmptyFill ||
-                        list_tripSheetData[i].BDepth != editItem.BDepth ||
-                        list_tripSheetData[i].Time != editItem.Time ||
-                        list_tripSheetData[i].Displacement_OE != editItem.Displacement_OE ||
-                        list_tripSheetData[i].Displacement_CE != editItem.Displacement_CE ||
+                    if (list_tripSheetData[i].TripVolume        != null &&
+                        (list_tripSheetData[i].TripVolume       != editItem.TripVolume ||
+                        list_tripSheetData[i].EmptyFill         != editItem.EmptyFill ||
+                        list_tripSheetData[i].BDepth            != editItem.BDepth ||
+                        list_tripSheetData[i].Time              != editItem.Time ||
+                        list_tripSheetData[i].Displacement_OE   != editItem.Displacement_OE ||
+                        list_tripSheetData[i].Displacement_CE   != editItem.Displacement_CE ||
                         firstLineEdit))
                     {
-                        editItem.Time = list_tripSheetData[i].Time;
-                        editItem.BDepth = list_tripSheetData[i].BDepth;
-                        editItem.TripVolume = list_tripSheetData[i].TripVolume;
-                        editItem.EmptyFill = list_tripSheetData[i].EmptyFill;
-                        editItem.Displacement_OE = list_tripSheetData[i].Displacement_OE;
-                        editItem.Displacement_CE = list_tripSheetData[i].Displacement_CE;
+                        editItem.Time               = list_tripSheetData[i].Time;
+                        editItem.BDepth             = list_tripSheetData[i].BDepth;
+                        editItem.TripVolume         = list_tripSheetData[i].TripVolume;
+                        editItem.EmptyFill          = list_tripSheetData[i].EmptyFill;
+                        editItem.Displacement_OE    = list_tripSheetData[i].Displacement_OE;
+                        editItem.Displacement_CE    = list_tripSheetData[i].Displacement_CE;
                         if (i == 0)
                         {
                             // Set line 0 to be all zeroes due to start point.
@@ -344,17 +346,17 @@ namespace TripSheet_SQLite
             Load_TripData();
         }
 
-        private static void CalculateTripData(TripSheetData editItem, TripSheetData tbefore, bool docalc = true)
+        private void CalculateTripData(TripSheetData editItem, TripSheetData tbefore, bool docalc = true)
         {
-            editItem.ActualVolume = docalc == true ? Volumes.ActualVolume(editItem.TripVolume, tbefore.TripVolume, editItem.EmptyFill) : tbefore == null ? 0.00M : tbefore.ActualVolume;
-            editItem.TheoreticalVol_OE = docalc == true ? Volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_OE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_OE;
-            editItem.TheoreticalVol_CE = docalc == true ? Volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_CE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_CE;
-            editItem.Diff_OE = docalc == true ? editItem.ActualVolume - editItem.TheoreticalVol_OE : tbefore == null ? 0.00M : tbefore.Diff_OE;
-            editItem.Diff_CE = docalc == true ? editItem.ActualVolume - editItem.TheoreticalVol_CE : tbefore == null ? 0.00M : tbefore.Diff_CE;
-            editItem.TotDiff_OE = docalc == true ? tbefore.TotDiff_OE + editItem.Diff_OE : tbefore == null ? 0.00M : tbefore.TotDiff_OE;
-            editItem.TotDiff_CE = docalc == true ? tbefore.TotDiff_CE + editItem.Diff_CE : tbefore == null ? 0.00M : tbefore.TotDiff_CE;
-            editItem.LossGainRate_OE = (editItem.Diff_OE / editItem.TimeDiffMin) * 60 * 60;
-            editItem.LossGainRate_CE = (editItem.Diff_CE / editItem.TimeDiffMin) * 60 * 60;
+            editItem.ActualVolume       = docalc == true ? volumes.ActualVolume(editItem.TripVolume, tbefore.TripVolume, editItem.EmptyFill) : tbefore == null ? 0.00M : tbefore.ActualVolume;
+            editItem.TheoreticalVol_OE  = docalc == true ? volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_OE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_OE;
+            editItem.TheoreticalVol_CE  = docalc == true ? volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_CE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_CE;
+            editItem.Diff_OE            = docalc == true ? volumes.Subtract(editItem.ActualVolume, editItem.TheoreticalVol_OE) : tbefore == null ? 0.00M : tbefore.Diff_OE;
+            editItem.Diff_CE            = docalc == true ? volumes.Subtract(editItem.ActualVolume, editItem.TheoreticalVol_CE) : tbefore == null ? 0.00M : tbefore.Diff_CE;
+            editItem.TotDiff_OE         = docalc == true ? volumes.Addition(tbefore.TotDiff_OE, editItem.Diff_OE) : tbefore == null ? 0.00M : tbefore.TotDiff_OE;
+            editItem.TotDiff_CE         = docalc == true ? volumes.Addition(tbefore.TotDiff_CE, editItem.Diff_CE) : tbefore == null ? 0.00M : tbefore.TotDiff_CE;
+            editItem.LossGainRate_OE    = volumes.GainLossTime(editItem.Diff_OE, editItem.TimeDiffMin);
+            editItem.LossGainRate_CE    = volumes.GainLossTime(editItem.Diff_CE, editItem.TimeDiffMin);
         }
 
         // Call PlotTheData to create graphs in ScottPlot
@@ -464,8 +466,8 @@ namespace TripSheet_SQLite
 
                (double mouseCoordX, double mouseCoordY) = TripPlot.GetMouseCoordinates();
                 double xyRatio = TripPlot.Plot.XAxis.Dims.PxPerUnit / TripPlot.Plot.YAxis.Dims.PxPerUnit;
-                (double pointX1, double pointY1, int pointIndex1) = MyScatterPlot1.GetPointNearest(mouseCoordX, mouseCoordY, xyRatio);
-                (double pointX2, double pointY2, int pointIndex2) = MyScatterPlot2.GetPointNearest(mouseCoordX, mouseCoordY, xyRatio);
+                (double pointX1, double pointY1, int pointIndex1) = tbTimeBased.IsChecked == true ? MyScatterPlot1.GetPointNearestX(mouseCoordX) : MyScatterPlot1.GetPointNearestY(mouseCoordY);    //(mouseCoordX, mouseCoordY, xyRatio);
+                (double pointX2, double pointY2, int pointIndex2) = tbTimeBased.IsChecked == true ? MyScatterPlot2.GetPointNearestX(mouseCoordX) : MyScatterPlot2.GetPointNearestY(mouseCoordY);    //(mouseCoordX, mouseCoordY, xyRatio);
 
                 int[] pointIndex = { pointIndex1, pointIndex2 };
                 double[] pointX = { pointX1, pointX2 };
