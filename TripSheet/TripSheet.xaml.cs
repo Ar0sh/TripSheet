@@ -20,7 +20,8 @@ namespace TripSheet_SQLite
     public partial class TripSheet : Window
     {
         public static TripSheetModel tripSheetModel = new TripSheetModel();
-        readonly Volumes volumes = new Volumes();
+        Volumes volumes = new Volumes();
+        bool Edit = true;
         // Data context
         //public static string connectionString;
         //public static TripSheetModel tripSheetModel;
@@ -74,6 +75,7 @@ namespace TripSheet_SQLite
 
         public TripSheet(string guid, string titleName)
         {
+            titleName = Startup.DevStatus == DevEnum.TESTING ? titleName + " TESTING" : titleName;
             SheetGuid = guid;
             InitializeComponent();
             Title = "TripSheet " + "| " + titleName;
@@ -141,20 +143,20 @@ namespace TripSheet_SQLite
 
         private void Load_PipeData()
         {
-            pipeList = Startup.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+            pipeList = tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
             cbPipe.ItemsSource = pipeList;
         }
 
         private void Load_CsgData()
         {
-            csgList = Startup.tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
+            csgList = tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
             cbCsg.ItemsSource = csgList;
         }
 
         private void CbPipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             PipeData selectedPipe = (PipeData)(sender as ComboBox).SelectedItem;
-            if(RbPipe.IsChecked == true)
+            if (RbPipe.IsChecked == true)
             {
                 CheckPipe(selectedPipe);
             }
@@ -163,7 +165,7 @@ namespace TripSheet_SQLite
         private void CbCsg_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CsgData selectedCsg = (CsgData)(sender as ComboBox).SelectedItem;
-            if(RbCsg.IsChecked == true)
+            if (RbCsg.IsChecked == true)
             {
                 CheckCasing(selectedCsg);
             }
@@ -172,12 +174,12 @@ namespace TripSheet_SQLite
         private void Load_TripData()
         {
             New_TripSheetInput.Clear();
-            List<TripSheetData> tripSheetDatas = Startup.tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList();
+            List<TripSheetData> tripSheetDatas = tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList();
             if (tripSheetDatas.Count == 0 && tbCE.Text != "")
             {
                 TripSheetData zeroItem = new TripSheetData();
                 EnterTripData(zeroItem, null, true);
-                Startup.tripSheetModel.TripSheetData.Add(zeroItem);
+                tripSheetModel.TripSheetData.Add(zeroItem);
                 SaveToSql();
             }
             if (tripSheetDatas.Count > 0)
@@ -188,15 +190,15 @@ namespace TripSheet_SQLite
                     EnterTripData(newItem, tripSheetDatas[i]);
                     New_TripSheetInput.Add(newItem);
                 }
-                pipeList = Startup.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+                pipeList = tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
                 var testing = tripSheetDatas.Last().PipeId;
-                var pipeDet = Startup.tripSheetModel.PipeData.FirstOrDefault(a => a.Id == testing);
+                var pipeDet = tripSheetModel.PipeData.FirstOrDefault(a => a.Id == testing);
                 var index = cbPipe.Items.IndexOf(pipeDet);
                 cbPipe.SelectedIndex = index != -1 ? index : 0;
             }
 
             dgTripData.DataContext = this;
-            if (Startup.tripSheetModel.TripSheetData.Count() != 0)
+            if (tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -204,31 +206,31 @@ namespace TripSheet_SQLite
 
         private void EnterTripData(TripSheetData newItem, TripSheetData tripSheetData, bool zero = false)
         {
-            newItem.Id                  = zero == false ? tripSheetData.Id : Guid.NewGuid().ToString();
-            newItem.Time                = zero == false ? tripSheetData.Time : DateTimeOffset.Now.ToUnixTimeSeconds();
-            newItem.ActualVolume        = zero == false ? tripSheetData.ActualVolume : 0.00M;
-            newItem.TripVolume          = zero == false ? tripSheetData.TripVolume : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("TRIPPVT")), 2);
-            newItem.BDepth              = zero == false ? tripSheetData.BDepth : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("BITDEP")), 2);
-            newItem.Diff_OE             = zero == false ? tripSheetData.Diff_OE : 0.00M;
-            newItem.Diff_CE             = zero == false ? tripSheetData.Diff_CE : 0.00M;
-            newItem.TotDiff_OE          = zero == false ? tripSheetData.TotDiff_OE : 0.00M;
-            newItem.TotDiff_CE          = zero == false ? tripSheetData.TotDiff_CE : 0.00M;
-            newItem.TheoreticalVol_OE   = zero == false ? tripSheetData.TheoreticalVol_OE : 0.00M;
-            newItem.TheoreticalVol_CE   = zero == false ? tripSheetData.TheoreticalVol_CE : 0.00M;
-            newItem.EmptyFill           = zero == false ? tripSheetData.EmptyFill : 0;
-            newItem.Displacement_OE     = zero == false ? tripSheetData.Displacement_OE : null;
-            newItem.Displacement_CE     = zero == false ? tripSheetData.Displacement_CE : null;
-            newItem.SheetId             = zero == false ? tripSheetData.SheetId : SheetGuid;
-            newItem.PipeId              = zero == false ? tripSheetData.PipeId : PipeGuid;
-            newItem.TimeDiffMin         = zero == false ? tripSheetData.TimeDiffMin : null;
-            newItem.LossGainRate_OE     = zero == false ? tripSheetData.LossGainRate_OE : null;
-            newItem.LossGainRate_CE     = zero == false ? tripSheetData.LossGainRate_CE : null;
+            newItem.Id = zero == false ? tripSheetData.Id : Guid.NewGuid().ToString();
+            newItem.Time = zero == false ? tripSheetData.Time : DateTimeOffset.Now.ToUnixTimeSeconds();
+            newItem.ActualVolume = zero == false ? tripSheetData.ActualVolume : 0.00M;
+            newItem.TripVolume = zero == false ? tripSheetData.TripVolume : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("TRIPPVT")), 2);
+            newItem.BDepth = zero == false ? tripSheetData.BDepth : Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("BITDEP")), 2);
+            newItem.Diff_OE = zero == false ? tripSheetData.Diff_OE : 0.00M;
+            newItem.Diff_CE = zero == false ? tripSheetData.Diff_CE : 0.00M;
+            newItem.TotDiff_OE = zero == false ? tripSheetData.TotDiff_OE : 0.00M;
+            newItem.TotDiff_CE = zero == false ? tripSheetData.TotDiff_CE : 0.00M;
+            newItem.TheoreticalVol_OE = zero == false ? tripSheetData.TheoreticalVol_OE : 0.00M;
+            newItem.TheoreticalVol_CE = zero == false ? tripSheetData.TheoreticalVol_CE : 0.00M;
+            newItem.EmptyFill = zero == false ? tripSheetData.EmptyFill : 0;
+            newItem.Displacement_OE = zero == false ? tripSheetData.Displacement_OE : null;
+            newItem.Displacement_CE = zero == false ? tripSheetData.Displacement_CE : null;
+            newItem.SheetId = zero == false ? tripSheetData.SheetId : SheetGuid;
+            newItem.PipeId = zero == false ? tripSheetData.PipeId : PipeGuid;
+            newItem.TimeDiffMin = zero == false ? tripSheetData.TimeDiffMin : null;
+            newItem.LossGainRate_OE = zero == false ? tripSheetData.LossGainRate_OE : null;
+            newItem.LossGainRate_CE = zero == false ? tripSheetData.LossGainRate_CE : null;
         }
 
         private void UpdateSheet()
         {
-            dgTripData.CommitEdit();
-            dgTripData.CommitEdit();
+            //dgTripData.CommitEdit();
+            //dgTripData.CommitEdit();
             int k = dgTripData.Items.Count;
             //var test = dgTripData.Items[k - 1];
             TripSheetData tnew = (TripSheetData)dgTripData.Items[k - 1];
@@ -237,38 +239,38 @@ namespace TripSheet_SQLite
             {
                 if (tbefore == null && tnew.Id == null)
                 {
-                    tnew.SheetId            = SheetGuid;
-                    tnew.PipeId             = PipeGuid;
-                    tnew.EmptyFill          = 0;
-                    tnew.Displacement_OE    = Convert.ToDecimal(tbOE.Text);
-                    tnew.Displacement_CE    = Convert.ToDecimal(tbCE.Text);
-                    tnew.ActualVolume       = tnew.TripVolume;
-                    tnew.TheoreticalVol_OE  = tnew.TripVolume;
-                    tnew.TheoreticalVol_CE  = tnew.TripVolume;
-                    tnew.Diff_OE            = 0.00M;
-                    tnew.Diff_CE            = 0.00M;
-                    tnew.TotDiff_OE         = 0.00M;
-                    tnew.TotDiff_CE         = 0.00M;
-                    Startup.tripSheetModel.TripSheetData.Add(tnew);
+                    tnew.SheetId = SheetGuid;
+                    tnew.PipeId = PipeGuid;
+                    tnew.EmptyFill = 0;
+                    tnew.Displacement_OE = Convert.ToDecimal(tbOE.Text);
+                    tnew.Displacement_CE = Convert.ToDecimal(tbCE.Text);
+                    tnew.ActualVolume = tnew.TripVolume;
+                    tnew.TheoreticalVol_OE = tnew.TripVolume;
+                    tnew.TheoreticalVol_CE = tnew.TripVolume;
+                    tnew.Diff_OE = 0.00M;
+                    tnew.Diff_CE = 0.00M;
+                    tnew.TotDiff_OE = 0.00M;
+                    tnew.TotDiff_CE = 0.00M;
+                    tripSheetModel.TripSheetData.Add(tnew);
                 }
                 if (tnew.Id == null && tnew.TripVolume != null && tnew.BDepth != 0 && tbefore != null)
                 {
-                    tnew.Id                 = Guid.NewGuid().ToString();
-                    tnew.SheetId            = SheetGuid;
-                    tnew.PipeId             = PipeGuid;
-                    tnew.Displacement_OE    = Convert.ToDecimal(tbOE.Text);
-                    tnew.Displacement_CE    = Convert.ToDecimal(tbCE.Text);
-                    tnew.ActualVolume       = volumes.ActualVolume(tnew.TripVolume, tbefore.TripVolume, tnew.EmptyFill);
-                    tnew.TheoreticalVol_OE  = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbOE.Text));
-                    tnew.TheoreticalVol_CE  = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbCE.Text));
-                    tnew.Diff_OE            = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_OE);
-                    tnew.Diff_CE            = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_CE);
-                    tnew.TotDiff_OE         = volumes.Addition(tbefore.TotDiff_OE, tnew.Diff_OE);
-                    tnew.TotDiff_CE         = volumes.Addition(tbefore.TotDiff_CE, tnew.Diff_CE);
-                    tnew.TimeDiffMin        = (int)(tnew.Time - tbefore.Time);
-                    tnew.LossGainRate_OE    = volumes.GainLossTime(tnew.Diff_OE, tnew.TimeDiffMin);
-                    tnew.LossGainRate_CE    = volumes.GainLossTime(tnew.Diff_CE, tnew.TimeDiffMin);
-                    Startup.tripSheetModel.TripSheetData.Add(tnew);
+                    tnew.Id = Guid.NewGuid().ToString();
+                    tnew.SheetId = SheetGuid;
+                    tnew.PipeId = PipeGuid;
+                    tnew.Displacement_OE = Convert.ToDecimal(tbOE.Text);
+                    tnew.Displacement_CE = Convert.ToDecimal(tbCE.Text);
+                    tnew.ActualVolume = volumes.ActualVolume(tnew.TripVolume, tbefore.TripVolume, tnew.EmptyFill);
+                    tnew.TheoreticalVol_OE = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbOE.Text));
+                    tnew.TheoreticalVol_CE = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbCE.Text));
+                    tnew.Diff_OE = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_OE);
+                    tnew.Diff_CE = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_CE);
+                    tnew.TotDiff_OE = volumes.Addition(tbefore.TotDiff_OE, tnew.Diff_OE);
+                    tnew.TotDiff_CE = volumes.Addition(tbefore.TotDiff_CE, tnew.Diff_CE);
+                    tnew.TimeDiffMin = (int)(tnew.Time - tbefore.Time);
+                    tnew.LossGainRate_OE = volumes.GainLossTime(tnew.Diff_OE, tnew.TimeDiffMin);
+                    tnew.LossGainRate_CE = volumes.GainLossTime(tnew.Diff_CE, tnew.TimeDiffMin);
+                    tripSheetModel.TripSheetData.Add(tnew);
                 }
                 else if (tnew.BDepth == 0)
                 {
@@ -276,11 +278,11 @@ namespace TripSheet_SQLite
                 }
                 SaveToSql();
             }
-            if (Startup.tripSheetModel.TripSheetData.Count() != 0)
+            if (tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
-            if(dgTripData.Items.Count > 0)
+            if (dgTripData.Items.Count > 0)
                 dgTripData.ScrollIntoView(dgTripData.Items.GetItemAt(dgTripData.Items.Count - 1));
         }
 
@@ -291,24 +293,24 @@ namespace TripSheet_SQLite
             for (int i = 0; i < list_tripSheetData.Count; i++)
             {
                 var id = list_tripSheetData[i].Id;
-                var editItem = Startup.tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
+                var editItem = tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
                 if (list_tripSheetData[i].Id != "" && list_tripSheetData[i].Id != null && editItem != null)
                 {
-                    if (list_tripSheetData[i].TripVolume        != null &&
-                        (list_tripSheetData[i].TripVolume       != editItem.TripVolume ||
-                        list_tripSheetData[i].EmptyFill         != editItem.EmptyFill ||
-                        list_tripSheetData[i].BDepth            != editItem.BDepth ||
-                        list_tripSheetData[i].Time              != editItem.Time ||
-                        list_tripSheetData[i].Displacement_OE   != editItem.Displacement_OE ||
-                        list_tripSheetData[i].Displacement_CE   != editItem.Displacement_CE ||
+                    if (list_tripSheetData[i].TripVolume != null &&
+                        (list_tripSheetData[i].TripVolume != editItem.TripVolume ||
+                        list_tripSheetData[i].EmptyFill != editItem.EmptyFill ||
+                        list_tripSheetData[i].BDepth != editItem.BDepth ||
+                        list_tripSheetData[i].Time != editItem.Time ||
+                        list_tripSheetData[i].Displacement_OE != editItem.Displacement_OE ||
+                        list_tripSheetData[i].Displacement_CE != editItem.Displacement_CE ||
                         firstLineEdit))
                     {
-                        editItem.Time               = list_tripSheetData[i].Time;
-                        editItem.BDepth             = list_tripSheetData[i].BDepth;
-                        editItem.TripVolume         = list_tripSheetData[i].TripVolume;
-                        editItem.EmptyFill          = list_tripSheetData[i].EmptyFill;
-                        editItem.Displacement_OE    = list_tripSheetData[i].Displacement_OE;
-                        editItem.Displacement_CE    = list_tripSheetData[i].Displacement_CE;
+                        editItem.Time = list_tripSheetData[i].Time;
+                        editItem.BDepth = list_tripSheetData[i].BDepth;
+                        editItem.TripVolume = list_tripSheetData[i].TripVolume;
+                        editItem.EmptyFill = list_tripSheetData[i].EmptyFill;
+                        editItem.Displacement_OE = list_tripSheetData[i].Displacement_OE;
+                        editItem.Displacement_CE = list_tripSheetData[i].Displacement_CE;
                         if (i == 0)
                         {
                             // Set line 0 to be all zeroes due to start point.
@@ -327,8 +329,8 @@ namespace TripSheet_SQLite
                             {
                                 var idj = list_tripSheetData[j].Id;
                                 var idb = list_tripSheetData[j - 1].Id;
-                                var editItemj = Startup.tripSheetModel.TripSheetData.First(item => item.Id == idj);
-                                var beforeItem = Startup.tripSheetModel.TripSheetData.First(item => item.Id == idb);
+                                var editItemj = tripSheetModel.TripSheetData.First(item => item.Id == idj);
+                                var beforeItem = tripSheetModel.TripSheetData.First(item => item.Id == idb);
                                 CalculateTripData(editItemj, beforeItem);
                             }
                         }
@@ -337,7 +339,7 @@ namespace TripSheet_SQLite
             }
             try
             {
-                Startup.tripSheetModel.SaveChanges();
+                tripSheetModel.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -348,15 +350,15 @@ namespace TripSheet_SQLite
 
         private void CalculateTripData(TripSheetData editItem, TripSheetData tbefore, bool docalc = true)
         {
-            editItem.ActualVolume       = docalc == true ? volumes.ActualVolume(editItem.TripVolume, tbefore.TripVolume, editItem.EmptyFill) : tbefore == null ? 0.00M : tbefore.ActualVolume;
-            editItem.TheoreticalVol_OE  = docalc == true ? volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_OE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_OE;
-            editItem.TheoreticalVol_CE  = docalc == true ? volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_CE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_CE;
-            editItem.Diff_OE            = docalc == true ? volumes.Subtract(editItem.ActualVolume, editItem.TheoreticalVol_OE) : tbefore == null ? 0.00M : tbefore.Diff_OE;
-            editItem.Diff_CE            = docalc == true ? volumes.Subtract(editItem.ActualVolume, editItem.TheoreticalVol_CE) : tbefore == null ? 0.00M : tbefore.Diff_CE;
-            editItem.TotDiff_OE         = docalc == true ? volumes.Addition(tbefore.TotDiff_OE, editItem.Diff_OE) : tbefore == null ? 0.00M : tbefore.TotDiff_OE;
-            editItem.TotDiff_CE         = docalc == true ? volumes.Addition(tbefore.TotDiff_CE, editItem.Diff_CE) : tbefore == null ? 0.00M : tbefore.TotDiff_CE;
-            editItem.LossGainRate_OE    = volumes.GainLossTime(editItem.Diff_OE, editItem.TimeDiffMin);
-            editItem.LossGainRate_CE    = volumes.GainLossTime(editItem.Diff_CE, editItem.TimeDiffMin);
+            editItem.ActualVolume = docalc == true ? volumes.ActualVolume(editItem.TripVolume, tbefore.TripVolume, editItem.EmptyFill) : tbefore == null ? 0.00M : tbefore.ActualVolume;
+            editItem.TheoreticalVol_OE = docalc == true ? volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_OE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_OE;
+            editItem.TheoreticalVol_CE = docalc == true ? volumes.TheoreticalVol(editItem.BDepth, tbefore.BDepth, (decimal)editItem.Displacement_CE) : tbefore == null ? 0.00M : tbefore.TheoreticalVol_CE;
+            editItem.Diff_OE = docalc == true ? volumes.Subtract(editItem.ActualVolume, editItem.TheoreticalVol_OE) : tbefore == null ? 0.00M : tbefore.Diff_OE;
+            editItem.Diff_CE = docalc == true ? volumes.Subtract(editItem.ActualVolume, editItem.TheoreticalVol_CE) : tbefore == null ? 0.00M : tbefore.Diff_CE;
+            editItem.TotDiff_OE = docalc == true ? volumes.Addition(tbefore.TotDiff_OE, editItem.Diff_OE) : tbefore == null ? 0.00M : tbefore.TotDiff_OE;
+            editItem.TotDiff_CE = docalc == true ? volumes.Addition(tbefore.TotDiff_CE, editItem.Diff_CE) : tbefore == null ? 0.00M : tbefore.TotDiff_CE;
+            editItem.LossGainRate_OE = volumes.GainLossTime(editItem.Diff_OE, editItem.TimeDiffMin);
+            editItem.LossGainRate_CE = volumes.GainLossTime(editItem.Diff_CE, editItem.TimeDiffMin);
         }
 
         // Call PlotTheData to create graphs in ScottPlot
@@ -367,7 +369,6 @@ namespace TripSheet_SQLite
             TripPlot.Plot.XAxis.Label(tbTimeBased.IsChecked == false ? "m³" : "");
             TripPlot.Plot.YLabel(tbTimeBased.IsChecked == false ? "Depth" : "m³");
             TripPlot.Plot.XAxis.DateTimeFormat(tbTimeBased.IsChecked == false ? false : true);
-
             // Intermediate datastorage
             dataLX1 = new List<double>();
             dataLX2 = new List<double>();
@@ -376,7 +377,7 @@ namespace TripSheet_SQLite
             dataLXT = new List<DateTime>();
 
             // Add data from database model
-            foreach (var data in Startup.tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList())
+            foreach (var data in tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList())
             {
                 if (RbCE.IsChecked == true)
                 {
@@ -416,7 +417,7 @@ namespace TripSheet_SQLite
                 TripPlot.Plot.AddVerticalLine(0, System.Drawing.Color.Black, 2, LineStyle.Solid);
                 TripPlot.Plot.SetAxisLimits(new AxisLimits(minmaxX[0] - 5, minmaxX[1] + 5, minmaxY[0] - 20, minmaxY[1] + 20), 0, 0);
             }
-            else if (Startup.tripSheetModel.TripSheetData.Count() != 0)
+            else if (tripSheetModel.TripSheetData.Count() != 0)
             {
                 TripPlot.Plot.AddHorizontalLine(0, System.Drawing.Color.Black, 1, LineStyle.Solid);
             }
@@ -464,7 +465,7 @@ namespace TripSheet_SQLite
             try
             {
 
-               (double mouseCoordX, double mouseCoordY) = TripPlot.GetMouseCoordinates();
+                (double mouseCoordX, double mouseCoordY) = TripPlot.GetMouseCoordinates();
                 double xyRatio = TripPlot.Plot.XAxis.Dims.PxPerUnit / TripPlot.Plot.YAxis.Dims.PxPerUnit;
                 (double pointX1, double pointY1, int pointIndex1) = tbTimeBased.IsChecked == true ? MyScatterPlot1.GetPointNearestX(mouseCoordX) : MyScatterPlot1.GetPointNearestY(mouseCoordY);    //(mouseCoordX, mouseCoordY, xyRatio);
                 (double pointX2, double pointY2, int pointIndex2) = tbTimeBased.IsChecked == true ? MyScatterPlot2.GetPointNearestX(mouseCoordX) : MyScatterPlot2.GetPointNearestY(mouseCoordY);    //(mouseCoordX, mouseCoordY, xyRatio);
@@ -472,15 +473,16 @@ namespace TripSheet_SQLite
                 int[] pointIndex = { pointIndex1, pointIndex2 };
                 double[] pointX = { pointX1, pointX2 };
                 double[] pointY = { pointY1, pointY2 };
-                for(int i = 0; i < HighlightedPoint.Count(); i++)
+                for (int i = 0; i < HighlightedPoint.Count(); i++)
                 {
+                    HighlightedPoint[i].MarkerLineWidth = 2;
                     HighlightedPoint[i].X = pointX[i];
                     HighlightedPoint[i].Y = pointY[i];
                     HighlightedPoint[i].IsVisible = true;
                 }
 
                 // Render if the highlighted point changed
-                for(int i = 0; i < LastHighlightedIndex.Count(); i++)
+                for (int i = 0; i < LastHighlightedIndex.Count(); i++)
                 {
                     if (LastHighlightedIndex[i] != pointIndex[i])
                     {
@@ -498,8 +500,8 @@ namespace TripSheet_SQLite
 
                 if (tbTimeBased.IsChecked == false)
                 {
-                    lbMouseover1.Content = $"{PipeMode1}: \t({Math.Round(pointX1, 2)}m³, {Math.Round(pointY1, 2)}m MD)";
-                    lbMouseover2.Content = $"{PipeMode2}: \t({Math.Round(pointX2, 2)}m³, {Math.Round(pointY2, 2)}m MD)";
+                    lbMouseover1.Content = $"{PipeMode1}: \t({Math.Round(pointX1, 2)}m³, {Math.Abs(Math.Round(pointY1, 2))}m MD)";
+                    lbMouseover2.Content = $"{PipeMode2}: \t({Math.Round(pointX2, 2)}m³, {Math.Abs(Math.Round(pointY2, 2))}m MD)";
                 }
                 else
                 {
@@ -510,14 +512,6 @@ namespace TripSheet_SQLite
             catch
             {
 
-            }
-        }
-
-        private void DgTripData_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if ((e.Key.Equals(Key.Enter)) || (e.Key.Equals(Key.Return)))
-            {
-                UpdateSheet();
             }
         }
 
@@ -568,16 +562,16 @@ namespace TripSheet_SQLite
                 }
                 foreach (TripSheetData output in input)
                 {
-                    Startup.tripSheetModel.TripSheetData.Remove(Startup.tripSheetModel.TripSheetData.First(a => a.Id == output.Id));
+                    tripSheetModel.TripSheetData.Remove(tripSheetModel.TripSheetData.First(a => a.Id == output.Id));
                 }
-                Startup.tripSheetModel.SaveChanges();
+                tripSheetModel.SaveChanges();
                 Load_TripData();
             }
         }
 
         private void TbTimeBased_Checked(object sender, RoutedEventArgs e)
         {
-            if (Startup.tripSheetModel.TripSheetData.Count() != 0)
+            if (tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -586,7 +580,7 @@ namespace TripSheet_SQLite
         private void RbOpenEnded_Checked(object sender, RoutedEventArgs e)
         {
             ChangeColumns(Visibility.Visible, Visibility.Hidden, primaryColor, secondaryColor, "Open Ended", "Closed Ended");
-            if (Startup.tripSheetModel.TripSheetData.Count() != 0)
+            if (tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -594,7 +588,7 @@ namespace TripSheet_SQLite
         private void RbCloseEnded_Checked(object sender, RoutedEventArgs e)
         {
             ChangeColumns(Visibility.Hidden, Visibility.Visible, secondaryColor, primaryColor, "Closed Ended", "Open Ended");
-            if (Startup.tripSheetModel.TripSheetData.Count() != 0)
+            if (tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -663,6 +657,18 @@ namespace TripSheet_SQLite
             tbOE.Text = "";
             tbCE.Text = "";
             btnNewLine.IsEnabled = false;
+        }
+
+        private void DgTripData_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (Edit == true)
+            {
+                Edit = false;
+                dgTripData.CommitEdit();
+                dgTripData.CommitEdit();
+                UpdateSheet();
+                Edit = true;
+            }
         }
     }
 }

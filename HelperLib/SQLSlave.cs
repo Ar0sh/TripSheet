@@ -10,11 +10,12 @@ namespace HelperLib
     public class SQLSlave
     {
         public TripSheetModel tripSheetModel;
+        public List<TripSheetDetail> sheetList;
 
         public SQLSlave()
         {
             tripSheetModel = new TripSheetModel();
-            List<TripSheetData> tripSheetDatas = tripSheetModel.TripSheetData.OrderBy(a => a.Time).ToList();
+            //List<TripSheetData> tripSheetDatas = tripSheetModel.TripSheetData.OrderBy(a => a.Time).ToList();
         }
 
         public void NewSheet(string name, string details, string wellID, string wellBoreID)

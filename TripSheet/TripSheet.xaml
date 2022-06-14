@@ -26,7 +26,7 @@
                         CanUserSortColumns="False"
                         AutoGenerateColumns="False"
                         SelectionUnit="Cell"
-                        PreviewKeyDown="DgTripData_PreviewKeyDown"
+                        CellEditEnding="DgTripData_CellEditEnding"
                         PreviewTextInput="DgTripData_PreviewTextInput"
                         IsSynchronizedWithCurrentItem="True"
                         AlternatingRowBackground="#7F02BC94"

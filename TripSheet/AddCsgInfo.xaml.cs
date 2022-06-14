@@ -15,8 +15,8 @@ namespace TripSheet_SQLite
 {
     public partial class AddCsgInfo : Window
     {
-        ObservableCollection<CsgData> _New_CsgData = new ObservableCollection<CsgData>();
-        public ObservableCollection<CsgData> New_CsgData
+        ObservableCollection<HelperLib.Model.CsgData> _New_CsgData = new ObservableCollection<HelperLib.Model.CsgData>();
+        public ObservableCollection<HelperLib.Model.CsgData> New_CsgData
         {
             get { return _New_CsgData; }
             set
@@ -39,16 +39,16 @@ namespace TripSheet_SQLite
         public AddCsgInfo()
         {
             InitializeComponent();
-            New_CsgData = new ObservableCollection<CsgData>();
+            New_CsgData = new ObservableCollection<HelperLib.Model.CsgData>();
             LoadCsg();
         }
 
         private void LoadCsg()
         {
             New_CsgData.Clear();
-            List<CsgData> csgData = new List<CsgData>();
-            csgData = Startup.tripSheetModel.CsgData.OrderBy(a => a.CEDisplacement).ToList();
-            foreach (CsgData dis in csgData)
+            List<HelperLib.Model.CsgData> csgData = new List<HelperLib.Model.CsgData>();
+            csgData = Startup.sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.CEDisplacement).ToList();
+            foreach (HelperLib.Model.CsgData dis in csgData)
             {
                 New_CsgData.Add(dis);
             }
@@ -56,7 +56,7 @@ namespace TripSheet_SQLite
         }
         private void SavePipeToSql()
         {
-            Startup.tripSheetModel.CsgData.Add(new CsgData()
+            Startup.sqlSlave.tripSheetModel.CsgData.Add(new HelperLib.Model.CsgData()
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = txtName.Text,
@@ -64,7 +64,7 @@ namespace TripSheet_SQLite
                 CEDisplacement = Convert.ToDecimal(txtCE.Text),
                 Details = txtDetails.Text
             });
-            Startup.tripSheetModel.SaveChanges();
+            Startup.sqlSlave.tripSheetModel.SaveChanges();
         }
         private void BtnSavePipe_Click(object sender, RoutedEventArgs e)
         {
@@ -92,9 +92,9 @@ namespace TripSheet_SQLite
                 }
                 foreach (CsgData output in input)
                 {
-                    exists = Startup.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
+                    exists = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
                     if (!exists)
-                        Startup.tripSheetModel.CsgData.Remove(Startup.tripSheetModel.CsgData.First(a => a.Id == output.Id));
+                        Startup.sqlSlave.tripSheetModel.CsgData.Remove(Startup.sqlSlave.tripSheetModel.CsgData.First(a => a.Id == output.Id));
                     else
                         ExistsError += "\nName: " + output.Name + " - " + "Id: " + output.Id;
                 }
@@ -102,7 +102,7 @@ namespace TripSheet_SQLite
                 {
                     MessageBox.Show(ExistsError, "Object locked", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                Startup.tripSheetModel.SaveChanges();
+                Startup.sqlSlave.tripSheetModel.SaveChanges();
                 LoadCsg();
             }
         }

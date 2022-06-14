@@ -2,40 +2,38 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using TripSheet_SQLite.Model;
+using System.Net;
 //using HelperLib.Model;
 using HelperLib;
+using System.IO;
 
 namespace TripSheet_SQLite
 {
     public partial class Startup : Window
     {
+        public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
+
         // Public variables.
         public static CDAconn GetCDA;
         public static dynamic dllInstance;
-        public static TripSheetModel tripSheetModel;
+        //public static TripSheetModel tripSheetModel;
         public static SQLSlave sqlSlave;
 
         // Private variables.
-        private List<TripSheetDetail> sheetList;
+        private List<HelperLib.Model.PipeData> exportPipe;
+        private List<HelperLib.Model.CsgData> exportCsg;
+        private List<string> TestHosts = new List<string> { "BHI61G25S2", "BHICZHX3G2" };
 
-        ObservableCollection<TripSheetDetail> _New_TripSheetDetail = new ObservableCollection<TripSheetDetail>();
+        ObservableCollection<HelperLib.Model.TripSheetDetail> _New_TripSheetDetail = new ObservableCollection<HelperLib.Model.TripSheetDetail>();
         /// <summary>
         /// TripSheet dataset, ObservableCollection so it notifies if added, modified or deleted.
         /// </summary>
-        public ObservableCollection<TripSheetDetail> New_TripSheetDetail
+        public ObservableCollection<HelperLib.Model.TripSheetDetail> New_TripSheetDetail
         {
             get { return _New_TripSheetDetail; }
             set
@@ -54,10 +52,29 @@ namespace TripSheet_SQLite
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
         #endregion
-        
+
         public Startup()
         {
-            InitializeComponent();
+            if (DevStatus == DevEnum.DEVELOPMENT)
+            {
+                InitializeComponent();
+                Title += " DEVELOPMENT";
+            }
+            else if (DevStatus == DevEnum.TESTING)
+            {
+                if (TestHosts.Contains(Dns.GetHostName()))
+                {
+                    InitializeComponent();
+                    Title += " TESTING";
+                }
+                else
+                {
+                    MessageBox.Show("Host not approved for testing.", "Invalid Host", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    Close();
+                }
+            }
+            else if (DevStatus == DevEnum.RELEASE)
+                InitializeComponent();
         }
 
         /// <summary>
@@ -65,9 +82,10 @@ namespace TripSheet_SQLite
         /// </summary>
         private void InitializeDB()
         {
-            tripSheetModel = new TripSheetModel();
+            //tripSheetModel = new TripSheetModel();
+            sqlSlave.tripSheetModel = new HelperLib.Model.TripSheetModel();
             //tripSheetModel = sqlSlave.tripSheetModel;
-            if (!tripSheetModel.Database.Exists())
+            if (!sqlSlave.tripSheetModel.Database.Exists())
             {
                 MessageBox.Show("Database does not exist, please contact Technical Support?", "Missing DB", MessageBoxButton.OK, MessageBoxImage.Warning);
                 Application.Current.Shutdown();
@@ -83,7 +101,7 @@ namespace TripSheet_SQLite
             sqlSlave = new SQLSlave();
             EnableUI();
             InitializeDB();
-            New_TripSheetDetail = new ObservableCollection<TripSheetDetail>();
+            New_TripSheetDetail = new ObservableCollection<HelperLib.Model.TripSheetDetail>();
             LoadSheets();
         }
 
@@ -92,21 +110,14 @@ namespace TripSheet_SQLite
         /// </summary>
         private void EnableUI()
         {
-            string connTest = "";
-            try
-            {
-                connTest = GetCDA.dllInstance.GetValueAsString("WELL_ID");
-            }
-            catch
-            {
-
-            }
+            string connTest = GetCDA.dllInstance.GetValueAsString("WELL_ID");
             if (connTest == "")
             {
                 Dispatcher.Invoke(() =>
                 {
                     btnLoad.IsEnabled = false;
                     btnNew.IsEnabled = false;
+                    btnEdit.IsEnabled = false;
                     btnConCDA.Visibility = Visibility.Visible;
                     btnConCDA.IsEnabled = true;
                     lbStatus.Content = "Status: CDA not found, message server not running?";
@@ -122,6 +133,7 @@ namespace TripSheet_SQLite
                 btnEditPipe.IsEnabled = true;
                 btnEditCsg.IsEnabled = true;
                 cbSheets.IsEnabled = true;
+                btnEdit.IsEnabled = true;
                 btnConCDA.Visibility = Visibility.Hidden;
                 btnConCDA.IsEnabled = false;
                 lbStatus.Content = "Status: No issues...";
@@ -132,12 +144,25 @@ namespace TripSheet_SQLite
         /// <summary>
         /// Load existing TripSheets from SQLite DB.
         /// </summary>
-        private void LoadSheets()
+        private void LoadSheets(bool edit = false, string id = "")
         {
-            sheetList = new List<TripSheetDetail>();
-            sheetList = tripSheetModel.TripSheetDetail.OrderBy(a => a.Name).ToList();
-            //sheetList = sqlSlave.LoadSheets();
-            cbSheets.ItemsSource = sheetList;
+            int selected = -1;
+            if (edit)
+            {
+                selected = cbSheets.SelectedIndex;
+                cbSheets.ItemsSource = null;
+                cbSheets.Items.Refresh();
+            }
+            sqlSlave.sheetList = sqlSlave.tripSheetModel.TripSheetDetail.OrderBy(a => a.Name).ToList();
+
+            cbSheets.ItemsSource = sqlSlave.sheetList;
+            if (id != "")
+            {
+                var selectedItem = sqlSlave.tripSheetModel.TripSheetDetail.First(a => a.Id == id);
+                cbSheets.SelectedItem = selectedItem;
+                return;
+            }
+            cbSheets.SelectedIndex = selected == -1 ? 0 : selected;
         }
 
         /// <summary>
@@ -145,12 +170,12 @@ namespace TripSheet_SQLite
         /// </summary>
         private void NewClick()
         {
-            if (tripSheetModel.PipeData.Count() == 0)
+            if (sqlSlave.tripSheetModel.PipeData.Count() == 0)
             {
                 MessageBox.Show("Please add pipe details before making a tripsheet.", "Add pipe data", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (txtNewName.Text == "" || txtNewName.Text == "Enter Sheet Name" || sheetList.Where(s => s.Name == txtNewName.Text).ToList().Count != 0)
+            if (txtNewName.Text == "" || txtNewName.Text == "Enter Sheet Name" || sqlSlave.sheetList.Where(s => s.Name == txtNewName.Text).ToList().Count != 0)
             {
                 lbNameErr.Content = "Name exists or not allowed";
                 lbNameErr.Foreground = Brushes.Red;
@@ -172,10 +197,13 @@ namespace TripSheet_SQLite
                 GetCDA.GetValueAsString("WELL_ID"),
                 GetCDA.GetValueAsString("HOLE_ID"));
             Hide();
-            TripSheet tripSheet = new TripSheet(sqlSlave.GetSheetID(txtNewName.Text), txtNewName.Text);
+            string activeID = sqlSlave.GetSheetID(txtNewName.Text);
+            TripSheet tripSheet = new TripSheet(activeID, txtNewName.Text);
             tripSheet.ShowDialog();
+            txtNewDetails.Text = "Enter Helpful Details";
+            txtNewName.Text = "Enter Sheet Name";
             Show();
-            LoadSheets();
+            LoadSheets(false, activeID);
         }
 
         /// <summary>
@@ -183,7 +211,7 @@ namespace TripSheet_SQLite
         /// </summary>
         private void LoadClick()
         {
-            if (tripSheetModel.PipeData.Count() == 0)
+            if (sqlSlave.tripSheetModel.PipeData.Count() == 0)
             {
                 MessageBox.Show("Please add pipe details before loading tripsheet.", "Add pipe data", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -191,7 +219,7 @@ namespace TripSheet_SQLite
             if (cbSheets.SelectedValue != null)
             {
                 Hide();
-                TripSheet tripSheet = new TripSheet(((TripSheetDetail)cbSheets.SelectedItem).Id, ((TripSheetDetail)cbSheets.SelectedItem).Name);
+                TripSheet tripSheet = new TripSheet(((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Id, ((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Name);
                 tripSheet.ShowDialog();
                 Show();
             }
@@ -202,14 +230,21 @@ namespace TripSheet_SQLite
         /// </summary>
         private void DeleteClick()
         {
-            MessageBoxResult result = MessageBox.Show("Delete " + ((TripSheetDetail)cbSheets.SelectedItem).Name, "Confirm", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                if (cbSheets.SelectedValue != null)
+                MessageBoxResult result = MessageBox.Show("Delete " + ((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Name, "Confirm", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
                 {
-                    sqlSlave.DeleteSheet(((TripSheetDetail)cbSheets.SelectedItem).Id);
-                    LoadSheets();
+                    if (cbSheets.SelectedValue != null)
+                    {
+                        sqlSlave.DeleteSheet(((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Id);
+                        LoadSheets();
+                    }
                 }
+            }
+            catch
+            {
+
             }
         }
 
@@ -233,9 +268,9 @@ namespace TripSheet_SQLite
 
         private void CbSheets_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbSheets.Items.Count > 0 && (TripSheetDetail)(sender as ComboBox).SelectedItem != null)
+            if (cbSheets.Items.Count > 0 && (HelperLib.Model.TripSheetDetail)(sender as ComboBox).SelectedItem != null)
             {
-                TripSheetDetail selectedSheet = (TripSheetDetail)(sender as ComboBox).SelectedItem;
+                HelperLib.Model.TripSheetDetail selectedSheet = (HelperLib.Model.TripSheetDetail)(sender as ComboBox).SelectedItem;
                 txtName.Text = selectedSheet.Name;
                 txtId.Text = selectedSheet.Id;
                 txtDetails.Text = selectedSheet.Details;
@@ -313,7 +348,60 @@ namespace TripSheet_SQLite
 
         private void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            EditSheet();
+        }
 
+        private void EditSheet()
+        {
+            if (cbSheets.Items.Count > 0)
+            {
+                Edit edit = new Edit(txtId.Text);
+                edit.ShowDialog();
+                LoadSheets(true);
+            }
+        }
+
+        private void BtnBlankDB_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Restore blank database?\nPipe and Casing data will be copied over to blank DB.", "Confirm", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                RestoreBlankDB();
+            }
+        }
+
+        private void RestoreBlankDB()
+        {
+            ExportPipe();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            System.Data.SQLite.SQLiteConnection.ClearAllPools();
+            var directory = Directory.GetCurrentDirectory();
+            File.Move(directory + "\\Database\\TripSheet.sqlite", directory + "\\Database\\TripSheet_" + DateTime.Now.ToString("ddMMMyy_HHmmss") + ".sqlite");
+            File.Copy(directory + "\\Database\\TripSheet_BlankDB.sqlite", directory + "\\Database\\TripSheet.sqlite");
+            ImportPipe();
+            LoadSheets();
+        }
+
+        private void ImportPipe()
+        {
+            foreach (var pipedata in exportPipe)
+            {
+                sqlSlave.tripSheetModel.PipeData.Add(pipedata);
+            }
+            foreach (var csgdata in exportCsg)
+            {
+                sqlSlave.tripSheetModel.CsgData.Add(csgdata);
+            }
+            exportCsg = null;
+            exportCsg = null;
+            sqlSlave.tripSheetModel.SaveChanges();
+        }
+
+        private void ExportPipe()
+        {
+            exportPipe = sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+            exportCsg = sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
         }
     }
 }

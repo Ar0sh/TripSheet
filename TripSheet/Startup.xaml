@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TripSheet_SQLite"
         mc:Ignorable="d"
-        Title="Startup" Height="430" Width="490" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Title="Startup" Height="430" Width="490" SizeToContent="WidthAndHeight" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         ContentRendered="Window_ContentRendered">
     <Grid>
         <GroupBox Header="New Sheet" HorizontalAlignment="Left" Height="141" Margin="10,10,0,0" VerticalAlignment="Top" Width="273">
@@ -20,7 +20,7 @@
         </GroupBox>
         <GroupBox Header="Trip Sheets in Database" Margin="10,177,10,10">
             <Grid>
-                <ComboBox x:Name="cbSheets" IsEnabled="False" HorizontalAlignment="Left" Height="26" Margin="92,11,0,0" VerticalAlignment="Top" Width="250"
+                <ComboBox x:Name="cbSheets" HorizontalContentAlignment="Center" IsEnabled="False" HorizontalAlignment="Left" Height="26" Margin="92,11,0,0" VerticalAlignment="Top" Width="250"
                   ItemsSource="{Binding sheetList}"
                   DisplayMemberPath="Name"
                   SelectionChanged="CbSheets_SelectionChanged"
@@ -40,6 +40,7 @@
                 <Label Content="Wellbore ID:" HorizontalAlignment="Left" Margin="10,166,0,0" VerticalAlignment="Top"/>
                 <Button x:Name="btnConCDA" IsEnabled="False" Visibility="Hidden" Content="Connect CDA" HorizontalAlignment="Left" Margin="347,166,0,0" VerticalAlignment="Top" Width="100" Click="BtnConCDA_Click" Height="25"/>
                 <Button x:Name="btnEdit" IsEnabled="False" Content="Edit" HorizontalAlignment="Left" Margin="347,42,0,0" VerticalAlignment="Top" Width="100" Click="BtnEdit_Click" Height="26"/>
+                <Button x:Name="btnBlankDB" Content="Restore Blank DB" HorizontalAlignment="Left" Margin="347,135,0,0" VerticalAlignment="Top" Width="100" Click="BtnBlankDB_Click" Height="26"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Pipe Data" HorizontalAlignment="Left" Height="141" Margin="288,10,0,0" VerticalAlignment="Top" Width="187">

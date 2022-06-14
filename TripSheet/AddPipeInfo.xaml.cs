@@ -15,8 +15,8 @@ namespace TripSheet_SQLite
 {
     public partial class AddPipeInfo : Window
     {
-        ObservableCollection<PipeData> _New_DisplacementData = new ObservableCollection<PipeData>();
-        public ObservableCollection<PipeData> New_DisplacementData
+        ObservableCollection<HelperLib.Model.PipeData> _New_DisplacementData = new ObservableCollection<HelperLib.Model.PipeData>();
+        public ObservableCollection<HelperLib.Model.PipeData> New_DisplacementData
         {
             get { return _New_DisplacementData; }
             set
@@ -39,16 +39,16 @@ namespace TripSheet_SQLite
         public AddPipeInfo()
         {
             InitializeComponent();
-            New_DisplacementData = new ObservableCollection<PipeData>();
+            New_DisplacementData = new ObservableCollection<HelperLib.Model.PipeData>();
             LoadPipes();
         }
 
         private void LoadPipes()
         {
             New_DisplacementData.Clear();
-            List<PipeData> displacementDatas = new List<PipeData>();
-            displacementDatas = Startup.tripSheetModel.PipeData.OrderBy(a => a.CEDisplacement).ToList();
-            foreach (PipeData dis in displacementDatas)
+            List<HelperLib.Model.PipeData> displacementDatas = new List<HelperLib.Model.PipeData>();
+            displacementDatas = Startup.sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.CEDisplacement).ToList();
+            foreach (HelperLib.Model.PipeData dis in displacementDatas)
             {
                 New_DisplacementData.Add(dis);
             }
@@ -56,7 +56,7 @@ namespace TripSheet_SQLite
         }
         private void SavePipeToSql()
         {
-            Startup.tripSheetModel.PipeData.Add(new PipeData()
+            Startup.sqlSlave.tripSheetModel.PipeData.Add(new HelperLib.Model.PipeData()
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = txtName.Text,
@@ -64,7 +64,7 @@ namespace TripSheet_SQLite
                 CEDisplacement = Convert.ToDecimal(txtCE.Text),
                 Details = txtDetails.Text
             });
-            Startup.tripSheetModel.SaveChanges();
+            Startup.sqlSlave.tripSheetModel.SaveChanges();
         }
         private void BtnSavePipe_Click(object sender, RoutedEventArgs e)
         {
@@ -92,9 +92,9 @@ namespace TripSheet_SQLite
                 }
                 foreach (PipeData output in input)
                 {
-                    exists = Startup.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
+                    exists = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
                     if (!exists)
-                        Startup.tripSheetModel.PipeData.Remove(Startup.tripSheetModel.PipeData.First(a => a.Id == output.Id));
+                        Startup.sqlSlave.tripSheetModel.PipeData.Remove(Startup.sqlSlave.tripSheetModel.PipeData.First(a => a.Id == output.Id));
                     else
                         ExistsError += "\nName: " + output.Name + " - " + "Id: " + output.Id;
                 }
@@ -102,14 +102,14 @@ namespace TripSheet_SQLite
                 {
                     MessageBox.Show(ExistsError, "Object locked", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                Startup.tripSheetModel.SaveChanges();
+                Startup.sqlSlave.tripSheetModel.SaveChanges();
                 LoadPipes();
             }
         }
 
         private void TxtDetails_PreviewKeyUp(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Return)
+            if (e.Key == Key.Return)
                 CheckContent();
         }
 
