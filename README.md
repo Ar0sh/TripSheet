@@ -6,6 +6,6 @@
 <h3>PS</h3>
 <p>Not usable as standalone, requires proprietary dll and system to grab live data.</p>
 
-<img src="https://user-images.githubusercontent.com/73751609/173661624-80f2a0c9-78c6-494f-af74-a0eeb8f8853b.png">
+<img src="https://user-images.githubusercontent.com/73751609/173798008-4e6232d9-98cc-4175-8f18-6d0213c76fcf.png">
 
 <img src="https://user-images.githubusercontent.com/73751609/173661693-1f6d1b54-1be3-4acd-9917-9c847a261afb.png">
