@@ -10,9 +10,9 @@
     <Grid>
         <GroupBox Header="New Sheet" HorizontalAlignment="Left" Height="141" Margin="10,10,0,0" VerticalAlignment="Top" Width="273">
             <Grid>
-                <Button x:Name="btnNew" IsEnabled="False" Content="Create New Sheet" Margin="63,0,10,18" Click="BtnNew_Click" Height="26" VerticalAlignment="Bottom"/>
-                <TextBox x:Name="txtNewName" VerticalContentAlignment="Center" Text="Enter Sheet Name" GotFocus="TxtNewName_GotFocus" LostFocus="TxtNewName_LostFocus" Height="26" Margin="63,13,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                <TextBox x:Name="txtNewDetails" VerticalContentAlignment="Center" Text="Enter Helpful Details" GotFocus="TxtNewDetails_GotFocus" LostFocus="TxtNewDetails_LostFocus" Height="26" Margin="63,44,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <Button TabIndex="2" x:Name="btnNew" IsEnabled="False" Content="Create New Sheet" Margin="63,0,10,18" Click="BtnNew_Click" Height="26" VerticalAlignment="Bottom"/>
+                <TextBox TabIndex="0" x:Name="txtNewName" VerticalContentAlignment="Center" Text="Enter Sheet Name" GotFocus="TxtNewName_GotFocus" LostFocus="TxtNewName_LostFocus" Height="26" Margin="63,13,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <TextBox TabIndex="1" x:Name="txtNewDetails" VerticalContentAlignment="Center" Text="Enter Helpful Details" GotFocus="TxtNewDetails_GotFocus" LostFocus="TxtNewDetails_LostFocus" Height="26" Margin="63,44,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 <Label Content="Name: " HorizontalAlignment="Left" Margin="10,13,0,0" VerticalAlignment="Top"/>
                 <Label Content="Details:" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top"/>
                 <Label x:Name="lbNameErr" HorizontalAlignment="Left" Margin="264,13,0,0" VerticalAlignment="Top"/>
@@ -20,13 +20,13 @@
         </GroupBox>
         <GroupBox Header="Trip Sheets in Database" Margin="10,177,10,10">
             <Grid>
-                <ComboBox x:Name="cbSheets" HorizontalContentAlignment="Center" IsEnabled="False" HorizontalAlignment="Left" Height="26" Margin="92,11,0,0" VerticalAlignment="Top" Width="250"
+                <ComboBox TabIndex="5" x:Name="cbSheets" IsEnabled="False" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="26" Margin="92,11,0,0" VerticalAlignment="Top" Width="250"
                   ItemsSource="{Binding sheetList}"
                   DisplayMemberPath="Name"
                   SelectionChanged="CbSheets_SelectionChanged"
                   />
-                <Button x:Name="btnLoad" IsEnabled="False" Content="Load" HorizontalAlignment="Left" Margin="347,11,0,0" VerticalAlignment="Top" Width="100" Click="BtnLoad_Click" Height="26"/>
-                <Button x:Name="btnDelete" IsEnabled="False"  Content="Delete" HorizontalAlignment="Left" Margin="347,73,0,0" VerticalAlignment="Top" Width="100" Click="BtnDelete_Click" Height="26"/>
+                <Button TabIndex="6" x:Name="btnLoad" IsEnabled="False" Content="Load" HorizontalAlignment="Left" Margin="347,11,0,0" VerticalAlignment="Top" Width="100" Click="BtnLoad_Click" Height="26"/>
+                <Button TabIndex="8" x:Name="btnDelete" IsEnabled="False"  Content="Delete" HorizontalAlignment="Left" Margin="347,73,0,0" VerticalAlignment="Top" Width="100" Click="BtnDelete_Click" Height="26"/>
                 <TextBox x:Name="txtName" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="False" HorizontalAlignment="Left" Height="26" Margin="92,42,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="250"/>
                 <TextBox x:Name="txtDetails" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="False" HorizontalAlignment="Left" Height="26" Margin="92,73,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="250"/>
                 <TextBox x:Name="txtId" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="False" HorizontalAlignment="Left" Height="26" Margin="92,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="250"/>
@@ -39,14 +39,15 @@
                 <Label Content="Well ID:" HorizontalAlignment="Left" Margin="10,135,0,0" VerticalAlignment="Top"/>
                 <Label Content="Wellbore ID:" HorizontalAlignment="Left" Margin="10,166,0,0" VerticalAlignment="Top"/>
                 <Button x:Name="btnConCDA" IsEnabled="False" Visibility="Hidden" Content="Connect CDA" HorizontalAlignment="Left" Margin="347,166,0,0" VerticalAlignment="Top" Width="100" Click="BtnConCDA_Click" Height="25"/>
-                <Button x:Name="btnEdit" IsEnabled="False" Content="Edit" HorizontalAlignment="Left" Margin="347,42,0,0" VerticalAlignment="Top" Width="100" Click="BtnEdit_Click" Height="26"/>
-                <Button x:Name="btnBlankDB" Content="Restore Blank DB" HorizontalAlignment="Left" Margin="347,135,0,0" VerticalAlignment="Top" Width="100" Click="BtnBlankDB_Click" Height="26"/>
+                <Button TabIndex="7" x:Name="btnEdit" IsEnabled="False" Content="Edit" HorizontalAlignment="Left" Margin="347,42,0,0" VerticalAlignment="Top" Width="100" Click="BtnEdit_Click" Height="26"/>
+                <Button TabIndex="9" x:Name="btnBlankDB" IsEnabled="False" Content="Restore Blank DB" HorizontalAlignment="Left" Margin="347,104,0,0" VerticalAlignment="Top" Width="100" Click="BtnBlankDB_Click" Height="26"/>
+                <Button TabIndex="10" x:Name="btnRestore" IsEnabled="False" Content="Restore Old DB" HorizontalAlignment="Left" Margin="347,135,0,0" VerticalAlignment="Top" Width="100" Click="BtnRestore_Click" Height="26"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Pipe Data" HorizontalAlignment="Left" Height="141" Margin="288,10,0,0" VerticalAlignment="Top" Width="187">
             <Grid>
-                <Button x:Name="btnEditPipe" IsEnabled="False" Content="Edit Pipe Data" Margin="10,10,10,0" VerticalAlignment="Top" Height="26" Click="BtnEditPipe_Click"/>
-                <Button x:Name="btnEditCsg" IsEnabled="False" Content="Edit Casing Data" Margin="10,41,10,0" VerticalAlignment="Top" Height="26" Click="BtnEditCsg_Click"/>
+                <Button TabIndex="3" x:Name="btnEditPipe" IsEnabled="False" Content="Edit Pipe Data" Margin="10,10,10,0" VerticalAlignment="Top" Height="26" Click="BtnEditPipe_Click"/>
+                <Button TabIndex="4" x:Name="btnEditCsg" IsEnabled="False" Content="Edit Casing Data" Margin="10,41,10,0" VerticalAlignment="Top" Height="26" Click="BtnEditCsg_Click"/>
             </Grid>
         </GroupBox>
         <Label x:Name="lbStatus" Content="Status: Checking CDA connection..." Foreground="Black" FontWeight="Bold" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="10,151,10,0" VerticalAlignment="Top" Height="26"/>

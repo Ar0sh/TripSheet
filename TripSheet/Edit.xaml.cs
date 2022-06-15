@@ -24,12 +24,12 @@ namespace TripSheet_SQLite
         {
             InitializeComponent();
             uid = UID;
-            LoadData(UID);
+            LoadData();
         }
 
-        private void LoadData(string uID)
+        private void LoadData()
         {
-            HelperLib.Model.TripSheetDetail test = Startup.sqlSlave.tripSheetModel.TripSheetDetail.First(a => a.Id == uID);
+            HelperLib.Model.TripSheetDetail test = Startup.sqlSlave.tripSheetModel.TripSheetDetail.First(a => a.Id == uid);
             txtName.Text = test.Name;
             txtDetails.Text = test.Details;
         }
@@ -43,6 +43,28 @@ namespace TripSheet_SQLite
                 Startup.sqlSlave.tripSheetModel.SaveChanges();
             }
             Close();
+        }
+
+        private void TxtName_GotFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = (sender as TextBox);
+            if (tb != null)
+            {
+                tb.SelectAll();
+            }
+        }
+
+        private void TxtName_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TextBox tb = (sender as TextBox);
+            if (tb != null)
+            {
+                if (!tb.IsKeyboardFocusWithin)
+                {
+                    e.Handled = true;
+                    tb.Focus();
+                }
+            }
         }
     }
 }

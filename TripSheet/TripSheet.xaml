@@ -17,7 +17,7 @@
             <ColumnDefinition Width="5"/>
             <ColumnDefinition MinWidth="250"/>
         </Grid.ColumnDefinitions>
-        <DataGrid x:Name="dgTripData"
+        <DataGrid TabIndex="10" x:Name="dgTripData"
                         Grid.Column="0"
                         ItemsSource="{Binding New_TripSheetInput}"
                         SelectedItem="{Binding SelectedItem, ElementName=dgTripData, Mode=TwoWay}"
@@ -26,8 +26,8 @@
                         CanUserSortColumns="False"
                         AutoGenerateColumns="False"
                         SelectionUnit="Cell"
-                        CellEditEnding="DgTripData_CellEditEnding"
                         PreviewTextInput="DgTripData_PreviewTextInput"
+                        CellEditEnding="DgTripData_CellEditEnding"
                         IsSynchronizedWithCurrentItem="True"
                         AlternatingRowBackground="#7F02BC94"
                         FontWeight="Normal" Margin="10,70,5,10">
@@ -126,26 +126,26 @@
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>
-        <Button x:Name="btnNewLine" Grid.Column="0" Content="New line" Height="25" Margin="0,40,5,0" VerticalAlignment="Top" Click="BtnNewLine_Click" HorizontalAlignment="Right" Width="80"/>
-        <ComboBox x:Name="cbPipe" Grid.Column="0" Height="25" Margin="184,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbPipe_SelectionChanged"
+        <Button TabIndex="9" x:Name="btnNewLine" Grid.Column="0" Content="New line" Height="25" Margin="0,40,5,0" VerticalAlignment="Top" Click="BtnNewLine_Click" HorizontalAlignment="Right" Width="80"/>
+        <ComboBox TabIndex="4" x:Name="cbPipe" Grid.Column="0" Height="25" Margin="184,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbPipe_SelectionChanged"
                   ItemsSource="{Binding pipeList}"
                   DisplayMemberPath="Name"/>
-        <ComboBox x:Name="cbCsg" Grid.Column="0" Height="25" Margin="184,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbCsg_SelectionChanged"
+        <ComboBox TabIndex="5" x:Name="cbCsg" Grid.Column="0" Height="25" Margin="184,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbCsg_SelectionChanged"
             ItemsSource="{Binding csgList}"
             DisplayMemberPath="Name"/>
-        <Button x:Name="btnAddPipe" Grid.Column="0" Content="Add Pipe Info" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddPipe_Click" Height="25"/>
-        <Button x:Name="btnAddCsg" Grid.Column="0" Content="Add Csg Info" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddCsg_Click" Height="25"/>
+        <Button TabIndex="0" x:Name="btnAddPipe" Grid.Column="0" Content="Add Pipe Info" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddPipe_Click" Height="25"/>
+        <Button TabIndex="1" x:Name="btnAddCsg" Grid.Column="0" Content="Add Csg Info" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddCsg_Click" Height="25"/>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
         <WpfPlot Name="TripPlot" Grid.Column="2" MouseMove="TripPlot_MouseMove" Margin="5,10,10,78" />
-        <CheckBox x:Name="tbTimeBased" Grid.Column="0" Checked="TbTimeBased_Checked" Unchecked="TbTimeBased_Checked" Content="Time plot" Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
+        <CheckBox TabIndex="8" x:Name="tbTimeBased" Grid.Column="0" Checked="TbTimeBased_Checked" Unchecked="TbTimeBased_Checked" Content="Time plot" Margin="0,16,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
         <Label Content="OE Disp:" HorizontalAlignment="Left" Margin="373,10,0,0" VerticalAlignment="Top"/>
         <Label Content="CE Disp:" HorizontalAlignment="Left" Margin="373,39,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="tbOE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,10,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
         <TextBox x:Name="tbCE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,39,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
-        <RadioButton x:Name="RbOE" Content="Open Ended" Checked="RbOpenEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,10,0,0" VerticalAlignment="Top" Height="25"/>
-        <RadioButton x:Name="RbCE" Content="Closed Ended" Checked="RbCloseEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,40,0,0" VerticalAlignment="Top" Height="25"/>
-        <RadioButton x:Name="RbPipe" Content="Pipe" Checked="RbPipe_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,10,0,0" VerticalAlignment="Top" Height="25"/>
-        <RadioButton x:Name="RbCsg" Content="Casing" Checked="RbCsg_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,40,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton TabIndex="6" x:Name="RbOE" Content="Open Ended" Checked="RbOpenEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,10,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton TabIndex="7" x:Name="RbCE" Content="Closed Ended" Checked="RbCloseEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,40,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton TabIndex="2" x:Name="RbPipe" Content="Pipe" Checked="RbPipe_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,10,0,0" VerticalAlignment="Top" Height="25"/>
+        <RadioButton TabIndex="3" x:Name="RbCsg" Content="Casing" Checked="RbCsg_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,40,0,0" VerticalAlignment="Top" Height="25"/>
         <Label x:Name="lbMouseover1" Grid.Column="2" Content="Primary: " Margin="5,0,10,36" Height="26" VerticalAlignment="Bottom"/>
         <Label x:Name="lbMouseover2" Grid.Column="2" Content="Secondary: " Margin="5,0,10,10" Height="26" VerticalAlignment="Bottom"/>
         <Label Content="l/m" HorizontalAlignment="Left" Margin="547,10,0,0" VerticalAlignment="Top"/>

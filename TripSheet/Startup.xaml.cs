@@ -11,22 +11,22 @@ using System.Net;
 //using HelperLib.Model;
 using HelperLib;
 using System.IO;
+using Microsoft.Win32;
 
 namespace TripSheet_SQLite
 {
     public partial class Startup : Window
     {
-        public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
+        public static DevEnum DevStatus = DevEnum.RELEASE;
 
         // Public variables.
+        public static string Version = "v0.79";
         public static CDAconn GetCDA;
         public static dynamic dllInstance;
         //public static TripSheetModel tripSheetModel;
         public static SQLSlave sqlSlave;
 
         // Private variables.
-        private List<HelperLib.Model.PipeData> exportPipe;
-        private List<HelperLib.Model.CsgData> exportCsg;
         private List<string> TestHosts = new List<string> { "BHI61G25S2", "BHICZHX3G2" };
 
         ObservableCollection<HelperLib.Model.TripSheetDetail> _New_TripSheetDetail = new ObservableCollection<HelperLib.Model.TripSheetDetail>();
@@ -55,17 +55,17 @@ namespace TripSheet_SQLite
 
         public Startup()
         {
+            InitializeComponent();
+            Title += " " + Version;
             if (DevStatus == DevEnum.DEVELOPMENT)
             {
-                InitializeComponent();
-                Title += " DEVELOPMENT";
+                Title += " | DEVELOPMENT";
             }
             else if (DevStatus == DevEnum.TESTING)
             {
                 if (TestHosts.Contains(Dns.GetHostName()))
                 {
-                    InitializeComponent();
-                    Title += " TESTING";
+                    Title += " | TESTING";
                 }
                 else
                 {
@@ -73,8 +73,6 @@ namespace TripSheet_SQLite
                     Close();
                 }
             }
-            else if (DevStatus == DevEnum.RELEASE)
-                InitializeComponent();
         }
 
         /// <summary>
@@ -82,9 +80,7 @@ namespace TripSheet_SQLite
         /// </summary>
         private void InitializeDB()
         {
-            //tripSheetModel = new TripSheetModel();
             sqlSlave.tripSheetModel = new HelperLib.Model.TripSheetModel();
-            //tripSheetModel = sqlSlave.tripSheetModel;
             if (!sqlSlave.tripSheetModel.Database.Exists())
             {
                 MessageBox.Show("Database does not exist, please contact Technical Support?", "Missing DB", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -118,6 +114,8 @@ namespace TripSheet_SQLite
                     btnLoad.IsEnabled = false;
                     btnNew.IsEnabled = false;
                     btnEdit.IsEnabled = false;
+                    btnBlankDB.IsEnabled = true;
+                    btnRestore.IsEnabled = true;
                     btnConCDA.Visibility = Visibility.Visible;
                     btnConCDA.IsEnabled = true;
                     lbStatus.Content = "Status: CDA not found, message server not running?";
@@ -134,6 +132,8 @@ namespace TripSheet_SQLite
                 btnEditCsg.IsEnabled = true;
                 cbSheets.IsEnabled = true;
                 btnEdit.IsEnabled = true;
+                btnBlankDB.IsEnabled = true;
+                btnRestore.IsEnabled = true;
                 btnConCDA.Visibility = Visibility.Hidden;
                 btnConCDA.IsEnabled = false;
                 lbStatus.Content = "Status: No issues...";
@@ -363,45 +363,46 @@ namespace TripSheet_SQLite
 
         private void BtnBlankDB_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show("Restore blank database?\nPipe and Casing data will be copied over to blank DB.", "Confirm", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
+            DBManager dBManager = new DBManager();
+            try
             {
-                RestoreBlankDB();
+                MessageBoxResult result = MessageBox.Show("Restore blank database?\nPipe and Casing data will be copied over to blank DB.", "Confirm", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    dBManager.RestoreBlankDB();
+                    LoadSheets();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Error restoring blank DB", "DB Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void RestoreBlankDB()
+        private void BtnRestore_Click(object sender, RoutedEventArgs e)
         {
-            ExportPipe();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            System.Data.SQLite.SQLiteConnection.ClearAllPools();
-            var directory = Directory.GetCurrentDirectory();
-            File.Move(directory + "\\Database\\TripSheet.sqlite", directory + "\\Database\\TripSheet_" + DateTime.Now.ToString("ddMMMyy_HHmmss") + ".sqlite");
-            File.Copy(directory + "\\Database\\TripSheet_BlankDB.sqlite", directory + "\\Database\\TripSheet.sqlite");
-            ImportPipe();
-            LoadSheets();
-        }
-
-        private void ImportPipe()
-        {
-            foreach (var pipedata in exportPipe)
+            DBManager dBManager = new DBManager();
+            try
             {
-                sqlSlave.tripSheetModel.PipeData.Add(pipedata);
+                OpenFileDialog fileDialog = new OpenFileDialog
+                {
+                    InitialDirectory = Directory.GetCurrentDirectory() + "\\Database",
+                    DefaultExt = ".sqlite",
+                    Filter = "sqlite files | *.sqlite",
+                    Title = "Select sqlite backup to restore"
+                };
+                MessageBoxResult result = MessageBox.Show("Backup current database before restoring database?", "Backup", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                bool backup = result == MessageBoxResult.Yes ? true : false;
+                if (fileDialog.ShowDialog() == true)
+                {
+                    dBManager.RestoreBlankDB(fileDialog.FileName, backup);
+                    LoadSheets();
+                }
             }
-            foreach (var csgdata in exportCsg)
+            catch
             {
-                sqlSlave.tripSheetModel.CsgData.Add(csgdata);
+                MessageBox.Show("Cannot restore DB", "DB Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            exportCsg = null;
-            exportCsg = null;
-            sqlSlave.tripSheetModel.SaveChanges();
-        }
-
-        private void ExportPipe()
-        {
-            exportPipe = sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
-            exportCsg = sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
         }
     }
 }

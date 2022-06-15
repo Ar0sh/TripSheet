@@ -78,7 +78,7 @@ namespace TripSheet_SQLite
             titleName = Startup.DevStatus == DevEnum.TESTING ? titleName + " TESTING" : titleName;
             SheetGuid = guid;
             InitializeComponent();
-            Title = "TripSheet " + "| " + titleName;
+            Title = "TripSheet " + Startup.Version + " | " + titleName;
             TripPlot.Configuration.DoubleClickBenchmark = false;
             TripPlot.RightClicked -= TripPlot.DefaultRightClickEvent;
             TripPlot.RightClicked += CustomRightClickMenu;

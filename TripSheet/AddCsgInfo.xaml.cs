@@ -149,7 +149,8 @@ namespace TripSheet_SQLite
 
         private void TxtOE_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !IsTextAllowed(e.Text, @"[^[0-9]([.,][0-9]{1,3})?$]");
+            //e.Handled = !IsTextAllowed(e.Text, @"[^[0-9]([.,][0-9]{1,3})?$]");
+            e.Handled = !IsTextAllowed(e.Text, @"[^0-9.]");
         }
 
         private static bool IsTextAllowed(string Text, string AllowedRegex)

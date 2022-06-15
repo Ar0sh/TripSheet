@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TripSheet_SQLite"
         mc:Ignorable="d"
-        Title="Add Pipe Info" Height="449.451" Width="741.484" WindowStartupLocation="CenterScreen">
+        Title="Add Pipe Info" MinHeight="400" MaxHeight="500" MinWidth="650" MaxWidth="650" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen">
     <Grid>
         <Label Content="Open End Displacement:" HorizontalAlignment="Left" Height="26" Margin="10,72,0,0" VerticalAlignment="Top"/>
         <Label Content="Closed End Displacement:" HorizontalAlignment="Left" Height="26" Margin="10,41,0,0" VerticalAlignment="Top"/>
@@ -21,7 +21,7 @@
                  x:Name="txtDetails" VerticalAlignment="Top" Width="220" PreviewKeyUp="TxtDetails_PreviewKeyUp"/>
         <Button x:Name="btnSavePipe" Content="Add" HorizontalAlignment="Left" Margin="188,138,0,0" VerticalAlignment="Top" Width="220"
                 Click="BtnSavePipe_Click" Height="26"/>
-        <DataGrid x:Name="dgPipeData"
+        <DataGrid IsTabStop="False" x:Name="dgPipeData"
                       ItemsSource="{Binding New_DisplacementData}"
                       SelectedItem="{Binding SelectedItem, ElementName=dgPipeData, Mode=TwoWay}"
                       CanUserAddRows="False"
@@ -48,9 +48,9 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn x:Name="colName" Width="100" Header="Name" Binding="{Binding Name}"/>
-                <DataGridTextColumn x:Name="colCEDisp" Width="*" Header="CE Disp." Binding="{Binding CEDisplacement, StringFormat='0.00'}"/>
-                <DataGridTextColumn x:Name="colOEDisp" Width="*" Header="OE Disp." Binding="{Binding OEDisplacement, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colName" Width="200" Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn x:Name="colCEDisp" Width="100" Header="CE Disp." Binding="{Binding CEDisplacement, StringFormat='0.00'}"/>
+                <DataGridTextColumn x:Name="colOEDisp" Width="100" Header="OE Disp." Binding="{Binding OEDisplacement, StringFormat='0.00'}"/>
                 <DataGridTextColumn x:Name="colInfo" Width="*" Header="Info" Binding="{Binding Details}"/>
                 <DataGridTextColumn Header="ID" Width="20" Binding="{Binding Id}" IsReadOnly="True" Visibility="Collapsed"/>
             </DataGrid.Columns>

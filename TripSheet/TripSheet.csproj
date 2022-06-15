@@ -139,6 +139,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DateConverter.cs" />
+    <Compile Include="DBManager.cs" />
     <Compile Include="DevEnum.cs" />
     <Compile Include="Edit.xaml.cs">
       <DependentUpon>Edit.xaml</DependentUpon>

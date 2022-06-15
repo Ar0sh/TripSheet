@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TripSheet_SQLite"
         mc:Ignorable="d"
-        Title="Edit" Height="450" Width="800">
+         Title="Edit" MinHeight="130" MinWidth="385" SizeToContent="WidthAndHeight" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-        <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="23" Margin="312,149,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="276"/>
-        <Button x:Name="btnSave" Content="Save" Click="Save_Click" HorizontalAlignment="Left" Margin="312,343,0,0" VerticalAlignment="Top" Width="75"/>
-        <TextBox x:Name="txtDetails" HorizontalAlignment="Left" Height="23" Margin="312,177,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="276"/>
+        <TextBox x:Name="txtName" GotFocus="TxtName_GotFocus" PreviewMouseLeftButtonDown="TxtName_PreviewMouseLeftButtonDown" Height="23" Margin="79,10,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtDetails" GotFocus="TxtName_GotFocus" PreviewMouseLeftButtonDown="TxtName_PreviewMouseLeftButtonDown" Height="23" Margin="79,44,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Button x:Name="btnSave" Content="Save" Click="Save_Click" HorizontalAlignment="Left" Margin="79,72,0,10" Width="75"/>
+        <Label Content="Name:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="Details:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
