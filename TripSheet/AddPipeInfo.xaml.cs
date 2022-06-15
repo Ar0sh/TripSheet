@@ -80,17 +80,17 @@ namespace TripSheet_SQLite
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             IList<DataGridCellInfo> selected = dgPipeData.SelectedCells;
-            List<PipeData> input = new List<PipeData>();
+            List<HelperLib.Model.PipeData> input = new List<HelperLib.Model.PipeData>();
             if (selected.Count > 0)
             {
                 string ExistsError = "These items are in use and locked: ";
                 bool exists = false;
                 foreach (DataGridCellInfo info in selected)
                 {
-                    if (!input.Contains((PipeData)info.Item))
-                        input.Add((PipeData)info.Item);
+                    if (!input.Contains((HelperLib.Model.PipeData)info.Item))
+                        input.Add((HelperLib.Model.PipeData)info.Item);
                 }
-                foreach (PipeData output in input)
+                foreach (HelperLib.Model.PipeData output in input)
                 {
                     exists = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
                     if (!exists)
