@@ -18,7 +18,7 @@ namespace HelperLib.Model
                 ConnectionString = new SQLiteConnectionStringBuilder()
                 {
                     DataSource = "Database\\TripSheet.sqlite",
-                    ForeignKeys = true
+                    //ForeignKeys = true
                 }.ConnectionString
             }, true)
         {

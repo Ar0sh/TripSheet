@@ -8,7 +8,10 @@
         Title="Trip Sheet" Height="500" Width="1280" MinWidth="1280" MinHeight="250"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <SolidColorBrush x:Key="CEcolor" Color="#FF9BF99B"/>
+        <SolidColorBrush x:Key="EditOK" Color="LightGreen"/>
+        <SolidColorBrush x:Key="EditNotOK" Color="#FFE06363"/>
+        <SolidColorBrush x:Key="DefaultFG" Color="Black"/>
+        <SolidColorBrush x:Key="SelectedRow" Color="#7F02BC94"/>
         <local:DateConverter x:Key="dateConverter"/>
     </Window.Resources>
     <Grid Margin="0,0,0,0">
@@ -26,10 +29,8 @@
                         CanUserSortColumns="False"
                         AutoGenerateColumns="False"
                         SelectionUnit="Cell"
-                        PreviewTextInput="DgTripData_PreviewTextInput"
                         CellEditEnding="DgTripData_CellEditEnding"
                         IsSynchronizedWithCurrentItem="True"
-                        AlternatingRowBackground="#7F02BC94"
                         FontWeight="Normal" Margin="10,70,5,10">
             <DataGrid.Resources>
                 <Style x:Key="tbStyle" TargetType="{x:Type TextBlock}">
@@ -47,72 +48,97 @@
                         </Trigger>
                     </Style.Triggers>
                 </Style>
+                <Style x:Key="EditableCells" TargetType="DataGridCell">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource EditOK}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="true" />
+                                <Condition Property="Selector.IsSelectionActive" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="{StaticResource EditOK}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                        </MultiTrigger>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter Property="Background" Value="{StaticResource EditOK}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
             </DataGrid.Resources>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" >
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SelectedRow}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="true" />
+                                <Condition Property="Selector.IsSelectionActive" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="{StaticResource EditNotOK}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FFE06363"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="true" />
+                                <Condition Property="Selector.IsSelectionActive" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="#FFE06363"/>
+                            <Setter Property="Foreground" Value="Black" />
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn x:Name="colTime" Width="150" Header="Time" IsReadOnly="True" Binding="{Binding Time, Converter={StaticResource dateConverter}}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="ToolTip" Value="Timestamp" />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colTime" Width="150" Header="Time" IsReadOnly="True" 
+                                    Binding="{Binding Time, Converter={StaticResource dateConverter}}"/>
                 <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)" 
-                                                EditingElementStyle="{StaticResource errorStyle}" ElementStyle="{StaticResource tbStyle}"
-                                                Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat='0.00'}">
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="colTripVol" Width="100" Header="Trip Vol.(m³)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, StringFormat='0.00'}"/>
-                <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, StringFormat='0.00'}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="ToolTip" Value="Enter volume added/removed to/from trip volume." />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, StringFormat='0.00'}"/>
-                <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, StringFormat='0.00'}"/>
-                <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding ActualVolume, StringFormat='0.00 m³'}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="ToolTip" Value="Actual volume change between rows." />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="colTheoretical_OE" Width="70" Header="Theor. Vol." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_OE, StringFormat='0.00 m³'}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Background" Value="{StaticResource CEcolor}" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="ToolTip" Value="Theoretical volume change between rows." />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="colTheoretical_CE" Width="70" Header="Theor. Vol." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_CE, StringFormat='0.00 m³'}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Background" Value="{StaticResource CEcolor}" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="ToolTip" Value="Theoretical volume change between rows." />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
+                                    EditingElementStyle="{StaticResource errorStyle}" ElementStyle="{StaticResource tbStyle}"
+                                    Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat='0.00'}"
+                                    CellStyle="{StaticResource EditableCells}"/>
+                <DataGridTextColumn x:Name="colTripVol" Width="100"  Header="Trip Vol.(m³)" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, StringFormat='0.00'}"
+                                    CellStyle="{StaticResource EditableCells}"/>
+                <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, StringFormat='0.00'}" 
+                                    CellStyle="{StaticResource EditableCells}"/>
+                <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, StringFormat='0.00'}" 
+                                    CellStyle="{StaticResource EditableCells}"/>
+                <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, StringFormat='0.00'}"
+                                     CellStyle="{StaticResource EditableCells}"/>
+                <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding ActualVolume, StringFormat='0.00 m³'}"/>
+                <DataGridTextColumn x:Name="colTheoretical_OE" Width="70" Header="Theor. Vol." IsReadOnly="True" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_OE, StringFormat='0.00 m³'}"/>
+                <DataGridTextColumn x:Name="colTheoretical_CE" Width="70" Header="Theor. Vol." IsReadOnly="True" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_CE, StringFormat='0.00 m³'}"/>
                 <DataGridTextColumn x:Name="colDiff_OE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_OE, StringFormat='0.00 m³'}"/>
                 <DataGridTextColumn x:Name="colDiff_CE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_CE, StringFormat='0.00 m³'}"/>
                 <DataGridTextColumn x:Name="colCumDiff_OE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_OE, StringFormat='0.00 m³'}"/>
                 <DataGridTextColumn x:Name="colCumDiff_CE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_CE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colLossGain_OE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_OE, StringFormat='0.00 m³/hr'}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="ToolTip" Value="Gain/Loss between station." />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="colLossGain_CE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_CE, StringFormat='0.00 m³/hr'}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="ToolTip" Value="Gain/Loss between station." />
-                        </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="colLossGain_OE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_OE, StringFormat='0.00 m³/hr'}"/>
+                <DataGridTextColumn x:Name="colLossGain_CE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_CE, StringFormat='0.00 m³/hr'}"/>
                 <DataGridTextColumn Header="ID" Width="20" Binding="{Binding Id}" IsReadOnly="True" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="PipeID" Width="20" Binding="{Binding PipeId}" IsReadOnly="True" Visibility="Collapsed"/>
             </DataGrid.Columns>

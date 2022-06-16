@@ -8,15 +8,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using TripSheet_SQLite.Model;
-//using HelperLib.Model;
+using HelperLib.Model;
 
 namespace TripSheet_SQLite
 {
     public partial class AddCsgInfo : Window
     {
-        ObservableCollection<HelperLib.Model.CsgData> _New_CsgData = new ObservableCollection<HelperLib.Model.CsgData>();
-        public ObservableCollection<HelperLib.Model.CsgData> New_CsgData
+        ObservableCollection<CsgData> _New_CsgData = new ObservableCollection<CsgData>();
+        public ObservableCollection<CsgData> New_CsgData
         {
             get { return _New_CsgData; }
             set
@@ -39,16 +38,16 @@ namespace TripSheet_SQLite
         public AddCsgInfo()
         {
             InitializeComponent();
-            New_CsgData = new ObservableCollection<HelperLib.Model.CsgData>();
+            New_CsgData = new ObservableCollection<CsgData>();
             LoadCsg();
         }
 
         private void LoadCsg()
         {
             New_CsgData.Clear();
-            List<HelperLib.Model.CsgData> csgData = new List<HelperLib.Model.CsgData>();
+            List<CsgData> csgData = new List<CsgData>();
             csgData = Startup.sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.CEDisplacement).ToList();
-            foreach (HelperLib.Model.CsgData dis in csgData)
+            foreach (CsgData dis in csgData)
             {
                 New_CsgData.Add(dis);
             }
@@ -56,7 +55,7 @@ namespace TripSheet_SQLite
         }
         private void SavePipeToSql()
         {
-            Startup.sqlSlave.tripSheetModel.CsgData.Add(new HelperLib.Model.CsgData()
+            Startup.sqlSlave.tripSheetModel.CsgData.Add(new CsgData()
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = txtName.Text,
@@ -80,19 +79,19 @@ namespace TripSheet_SQLite
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             IList<DataGridCellInfo> selected = dgCsgData.SelectedCells;
-            List<HelperLib.Model.CsgData> input = new List<HelperLib.Model.CsgData>();
+            List<CsgData> input = new List<CsgData>();
             if (selected.Count > 0)
             {
                 string ExistsError = "These items are in use and locked: ";
                 bool exists = false;
                 foreach (DataGridCellInfo info in selected)
                 {
-                    if (!input.Contains((HelperLib.Model.CsgData)info.Item))
-                        input.Add((HelperLib.Model.CsgData)info.Item);
+                    if (!input.Contains((CsgData)info.Item))
+                        input.Add((CsgData)info.Item);
                 }
-                foreach (HelperLib.Model.CsgData output in input)
+                foreach (CsgData output in input)
                 {
-                    exists = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
+                    exists = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null;
                     if (!exists)
                         Startup.sqlSlave.tripSheetModel.CsgData.Remove(Startup.sqlSlave.tripSheetModel.CsgData.First(a => a.Id == output.Id));
                     else

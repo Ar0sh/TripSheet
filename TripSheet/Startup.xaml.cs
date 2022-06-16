@@ -6,34 +6,34 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using TripSheet_SQLite.Model;
 using System.Net;
-//using HelperLib.Model;
+using HelperLib.Model;
 using HelperLib;
 using System.IO;
 using Microsoft.Win32;
+
 
 namespace TripSheet_SQLite
 {
     public partial class Startup : Window
     {
-        public static DevEnum DevStatus = DevEnum.RELEASE;
+        public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
 
         // Public variables.
         public static string Version = "v0.79";
         public static CDAconn GetCDA;
         public static dynamic dllInstance;
-        //public static TripSheetModel tripSheetModel;
         public static SQLSlave sqlSlave;
 
         // Private variables.
         private List<string> TestHosts = new List<string> { "BHI61G25S2", "BHICZHX3G2" };
 
-        ObservableCollection<HelperLib.Model.TripSheetDetail> _New_TripSheetDetail = new ObservableCollection<HelperLib.Model.TripSheetDetail>();
+        ObservableCollection<TripSheetDetail> _New_TripSheetDetail = new ObservableCollection<TripSheetDetail>();
+
         /// <summary>
         /// TripSheet dataset, ObservableCollection so it notifies if added, modified or deleted.
         /// </summary>
-        public ObservableCollection<HelperLib.Model.TripSheetDetail> New_TripSheetDetail
+        public ObservableCollection<TripSheetDetail> New_TripSheetDetail
         {
             get { return _New_TripSheetDetail; }
             set
@@ -80,7 +80,7 @@ namespace TripSheet_SQLite
         /// </summary>
         private void InitializeDB()
         {
-            sqlSlave.tripSheetModel = new HelperLib.Model.TripSheetModel();
+            sqlSlave.tripSheetModel = new TripSheetModel();
             if (!sqlSlave.tripSheetModel.Database.Exists())
             {
                 MessageBox.Show("Database does not exist, please contact Technical Support?", "Missing DB", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -97,7 +97,7 @@ namespace TripSheet_SQLite
             sqlSlave = new SQLSlave();
             EnableUI();
             InitializeDB();
-            New_TripSheetDetail = new ObservableCollection<HelperLib.Model.TripSheetDetail>();
+            New_TripSheetDetail = new ObservableCollection<TripSheetDetail>();
             LoadSheets();
         }
 
@@ -106,7 +106,7 @@ namespace TripSheet_SQLite
         /// </summary>
         private void EnableUI()
         {
-            string connTest = GetCDA.dllInstance.GetValueAsString("WELL_ID");
+            string connTest = "a"; // GetCDA.dllInstance.GetValueAsString("WELL_ID");
             if (connTest == "")
             {
                 Dispatcher.Invoke(() =>
@@ -219,7 +219,7 @@ namespace TripSheet_SQLite
             if (cbSheets.SelectedValue != null)
             {
                 Hide();
-                TripSheet tripSheet = new TripSheet(((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Id, ((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Name);
+                TripSheet tripSheet = new TripSheet(((TripSheetDetail)cbSheets.SelectedItem).Id, ((TripSheetDetail)cbSheets.SelectedItem).Name);
                 tripSheet.ShowDialog();
                 Show();
             }
@@ -232,12 +232,12 @@ namespace TripSheet_SQLite
         {
             try
             {
-                MessageBoxResult result = MessageBox.Show("Delete " + ((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Name, "Confirm", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Delete " + ((TripSheetDetail)cbSheets.SelectedItem).Name, "Confirm", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
                     if (cbSheets.SelectedValue != null)
                     {
-                        sqlSlave.DeleteSheet(((HelperLib.Model.TripSheetDetail)cbSheets.SelectedItem).Id);
+                        sqlSlave.DeleteSheet(((TripSheetDetail)cbSheets.SelectedItem).Id);
                         LoadSheets();
                     }
                 }
@@ -268,9 +268,9 @@ namespace TripSheet_SQLite
 
         private void CbSheets_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbSheets.Items.Count > 0 && (HelperLib.Model.TripSheetDetail)(sender as ComboBox).SelectedItem != null)
+            if (cbSheets.Items.Count > 0 && (TripSheetDetail)(sender as ComboBox).SelectedItem != null)
             {
-                HelperLib.Model.TripSheetDetail selectedSheet = (HelperLib.Model.TripSheetDetail)(sender as ComboBox).SelectedItem;
+                TripSheetDetail selectedSheet = (TripSheetDetail)(sender as ComboBox).SelectedItem;
                 txtName.Text = selectedSheet.Name;
                 txtId.Text = selectedSheet.Id;
                 txtDetails.Text = selectedSheet.Details;
@@ -361,15 +361,19 @@ namespace TripSheet_SQLite
             }
         }
 
+        /// <summary>
+        /// Restore blank DB through SQLSlave.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnBlankDB_Click(object sender, RoutedEventArgs e)
         {
-            DBManager dBManager = new DBManager();
             try
             {
                 MessageBoxResult result = MessageBox.Show("Restore blank database?\nPipe and Casing data will be copied over to blank DB.", "Confirm", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
-                    dBManager.RestoreBlankDB();
+                    sqlSlave.RestoreBlankDB();
                     LoadSheets();
                 }
             }
@@ -379,9 +383,13 @@ namespace TripSheet_SQLite
             }
         }
 
+        /// <summary>
+        /// Restore historical database, also through SQLSlave
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnRestore_Click(object sender, RoutedEventArgs e)
         {
-            DBManager dBManager = new DBManager();
             try
             {
                 OpenFileDialog fileDialog = new OpenFileDialog
@@ -395,7 +403,7 @@ namespace TripSheet_SQLite
                 bool backup = result == MessageBoxResult.Yes ? true : false;
                 if (fileDialog.ShowDialog() == true)
                 {
-                    dBManager.RestoreBlankDB(fileDialog.FileName, backup);
+                    sqlSlave.RestoreBlankDB(fileDialog.FileName, backup);
                     LoadSheets();
                 }
             }

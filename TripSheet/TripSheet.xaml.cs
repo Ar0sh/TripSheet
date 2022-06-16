@@ -9,8 +9,7 @@ using System.IO;
 using System.Windows.Controls;
 using ScottPlot.Plottable;
 using Microsoft.Win32;
-using TripSheet_SQLite.Model;
-//using HelperLib.Model;
+using HelperLib.Model;
 using Calculations;
 using System.Windows.Media;
 using ScottPlot;
@@ -19,12 +18,8 @@ namespace TripSheet_SQLite
 {
     public partial class TripSheet : Window
     {
-        public static TripSheetModel tripSheetModel = new TripSheetModel();
         Volumes volumes = new Volumes();
         bool Edit = true;
-        // Data context
-        //public static string connectionString;
-        //public static TripSheetModel tripSheetModel;
         public static bool saveStartup = false;
         List<PipeData> pipeList;
         List<CsgData> csgList;
@@ -34,13 +29,13 @@ namespace TripSheet_SQLite
         Brush secondaryColor = Brushes.Red;
         System.Drawing.Color primaryColorPlot = System.Drawing.Color.Green;
         System.Drawing.Color secondaryColorPlot = System.Drawing.Color.Red;
-        // X, Y, XT(Time X axis) data sets
+        // X, Y, XT(Time X axis) data sets for plot
         List<double> dataLX1 = new List<double>();
         List<double> dataLX2 = new List<double>();
         List<double> dataLY1 = new List<double>();
         List<double> dataLY2 = new List<double>();
         List<DateTime> dataLXT = new List<DateTime>();
-        // Variables used to make points
+        // Variables used to make points on plot
         double[] dataX1;
         double[] dataX2;
         double[] dataY1;
@@ -53,6 +48,10 @@ namespace TripSheet_SQLite
         private ScatterPlot MyScatterPlot1;
         private ScatterPlot MyScatterPlot2;
         ObservableCollection<TripSheetData> _New_TripSheetInput = new ObservableCollection<TripSheetData>();
+
+        /// <summary>
+        /// TripSheetInput dataset, ObservableCollection so it notifies if added, modified or deleted.
+        /// </summary>
         public ObservableCollection<TripSheetData> New_TripSheetInput
         {
             get { return _New_TripSheetInput; }
@@ -96,6 +95,12 @@ namespace TripSheet_SQLite
             RbOE.IsChecked = true;
 
         }
+
+        /// <summary>
+        /// Custom right click menu for plot, including reset zoom, plot window and save image.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CustomRightClickMenu(object sender, EventArgs e)
         {
             MenuItem zoomToFit = new MenuItem() { Header = "Zoom To Fit" };
@@ -112,6 +117,7 @@ namespace TripSheet_SQLite
 
             rightClickMenu.IsOpen = true;
         }
+        // Save plot image method.
         private void SavePlotImage(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog()
@@ -125,7 +131,7 @@ namespace TripSheet_SQLite
                 TripPlot.Plot.SaveFig(saveFileDialog.FileName);
             }
         }
-
+        // Open seperate plot window.
         private void OpenPlotWindow(object sender, RoutedEventArgs e)
         {
             WpfPlotViewer wpfPlotViewer = new WpfPlotViewer(TripPlot.Plot)
@@ -134,25 +140,25 @@ namespace TripSheet_SQLite
             };
             wpfPlotViewer.Show();
         }
-
+        // Zoom to fit/reset zoom
         private void ZoomToFit(object sender, RoutedEventArgs e)
         {
             TripPlot.Plot.AxisAuto();
             TripPlot.Refresh();
         }
-
+        // Load drill pipe table data
         private void Load_PipeData()
         {
-            pipeList = tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+            pipeList = Startup.sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
             cbPipe.ItemsSource = pipeList;
         }
-
+        // Load casing table data
         private void Load_CsgData()
         {
-            csgList = tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
+            csgList = Startup.sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
             cbCsg.ItemsSource = csgList;
         }
-
+        // Changed selection of pipe in combobox trigger
         private void CbPipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             PipeData selectedPipe = (PipeData)(sender as ComboBox).SelectedItem;
@@ -161,7 +167,7 @@ namespace TripSheet_SQLite
                 CheckPipe(selectedPipe);
             }
         }
-
+        // Changed selection of casing in combobox trigger
         private void CbCsg_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CsgData selectedCsg = (CsgData)(sender as ComboBox).SelectedItem;
@@ -170,16 +176,16 @@ namespace TripSheet_SQLite
                 CheckCasing(selectedCsg);
             }
         }
-
+        // Load trip table data
         private void Load_TripData()
         {
             New_TripSheetInput.Clear();
-            List<TripSheetData> tripSheetDatas = tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList();
+            List<TripSheetData> tripSheetDatas = Startup.sqlSlave.tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList();
             if (tripSheetDatas.Count == 0 && tbCE.Text != "")
             {
                 TripSheetData zeroItem = new TripSheetData();
                 EnterTripData(zeroItem, null, true);
-                tripSheetModel.TripSheetData.Add(zeroItem);
+                Startup.sqlSlave.tripSheetModel.TripSheetData.Add(zeroItem);
                 SaveToSql();
             }
             if (tripSheetDatas.Count > 0)
@@ -190,20 +196,21 @@ namespace TripSheet_SQLite
                     EnterTripData(newItem, tripSheetDatas[i]);
                     New_TripSheetInput.Add(newItem);
                 }
-                pipeList = tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+                pipeList = Startup.sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
                 var testing = tripSheetDatas.Last().PipeId;
-                var pipeDet = tripSheetModel.PipeData.FirstOrDefault(a => a.Id == testing);
+                var pipeDet = Startup.sqlSlave.tripSheetModel.PipeData.FirstOrDefault(a => a.Id == testing);
                 var index = cbPipe.Items.IndexOf(pipeDet);
                 cbPipe.SelectedIndex = index != -1 ? index : 0;
             }
 
             dgTripData.DataContext = this;
-            if (tripSheetModel.TripSheetData.Count() != 0)
+            if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
         }
 
+        // Set new tripsheetdata items values, if first entry or not.
         private void EnterTripData(TripSheetData newItem, TripSheetData tripSheetData, bool zero = false)
         {
             newItem.Id = zero == false ? tripSheetData.Id : Guid.NewGuid().ToString();
@@ -227,14 +234,13 @@ namespace TripSheet_SQLite
             newItem.LossGainRate_CE = zero == false ? tripSheetData.LossGainRate_CE : null;
         }
 
+        // Update trip data table
         private void UpdateSheet()
         {
-            //dgTripData.CommitEdit();
-            //dgTripData.CommitEdit();
             int k = dgTripData.Items.Count;
-            //var test = dgTripData.Items[k - 1];
             TripSheetData tnew = (TripSheetData)dgTripData.Items[k - 1];
             TripSheetData tbefore = k != 1 ? (TripSheetData)dgTripData.Items[k - 2] : null;
+            // Check if new or edited row. If edited, redo calculations.
             if (tnew.Id != null || (tnew.Id == null && tnew.EmptyFill != null))
             {
                 if (tbefore == null && tnew.Id == null)
@@ -251,7 +257,7 @@ namespace TripSheet_SQLite
                     tnew.Diff_CE = 0.00M;
                     tnew.TotDiff_OE = 0.00M;
                     tnew.TotDiff_CE = 0.00M;
-                    tripSheetModel.TripSheetData.Add(tnew);
+                    Startup.sqlSlave.tripSheetModel.TripSheetData.Add(tnew);
                 }
                 if (tnew.Id == null && tnew.TripVolume != null && tnew.BDepth != 0 && tbefore != null)
                 {
@@ -270,7 +276,7 @@ namespace TripSheet_SQLite
                     tnew.TimeDiffMin = (int)(tnew.Time - tbefore.Time);
                     tnew.LossGainRate_OE = volumes.GainLossTime(tnew.Diff_OE, tnew.TimeDiffMin);
                     tnew.LossGainRate_CE = volumes.GainLossTime(tnew.Diff_CE, tnew.TimeDiffMin);
-                    tripSheetModel.TripSheetData.Add(tnew);
+                    Startup.sqlSlave.tripSheetModel.TripSheetData.Add(tnew);
                 }
                 else if (tnew.BDepth == 0)
                 {
@@ -278,7 +284,7 @@ namespace TripSheet_SQLite
                 }
                 SaveToSql();
             }
-            if (tripSheetModel.TripSheetData.Count() != 0)
+            if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -286,6 +292,9 @@ namespace TripSheet_SQLite
                 dgTripData.ScrollIntoView(dgTripData.Items.GetItemAt(dgTripData.Items.Count - 1));
         }
 
+        /// <summary>
+        /// Save new row to database, or update edited item.
+        /// </summary>
         private void SaveToSql()
         {
             bool firstLineEdit = false;
@@ -293,7 +302,7 @@ namespace TripSheet_SQLite
             for (int i = 0; i < list_tripSheetData.Count; i++)
             {
                 var id = list_tripSheetData[i].Id;
-                var editItem = tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
+                var editItem = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
                 if (list_tripSheetData[i].Id != "" && list_tripSheetData[i].Id != null && editItem != null)
                 {
                     if (list_tripSheetData[i].TripVolume != null &&
@@ -329,8 +338,8 @@ namespace TripSheet_SQLite
                             {
                                 var idj = list_tripSheetData[j].Id;
                                 var idb = list_tripSheetData[j - 1].Id;
-                                var editItemj = tripSheetModel.TripSheetData.First(item => item.Id == idj);
-                                var beforeItem = tripSheetModel.TripSheetData.First(item => item.Id == idb);
+                                var editItemj = Startup.sqlSlave.tripSheetModel.TripSheetData.First(item => item.Id == idj);
+                                var beforeItem = Startup.sqlSlave.tripSheetModel.TripSheetData.First(item => item.Id == idb);
                                 CalculateTripData(editItemj, beforeItem);
                             }
                         }
@@ -339,7 +348,8 @@ namespace TripSheet_SQLite
             }
             try
             {
-                tripSheetModel.SaveChanges();
+                // Commit data to SQLite database
+                Startup.sqlSlave.tripSheetModel.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -348,6 +358,7 @@ namespace TripSheet_SQLite
             Load_TripData();
         }
 
+        // Volume calculations
         private void CalculateTripData(TripSheetData editItem, TripSheetData tbefore, bool docalc = true)
         {
             editItem.ActualVolume = docalc == true ? volumes.ActualVolume(editItem.TripVolume, tbefore.TripVolume, editItem.EmptyFill) : tbefore == null ? 0.00M : tbefore.ActualVolume;
@@ -377,7 +388,7 @@ namespace TripSheet_SQLite
             dataLXT = new List<DateTime>();
 
             // Add data from database model
-            foreach (var data in tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList())
+            foreach (var data in Startup.sqlSlave.tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList())
             {
                 if (RbCE.IsChecked == true)
                 {
@@ -417,7 +428,7 @@ namespace TripSheet_SQLite
                 TripPlot.Plot.AddVerticalLine(0, System.Drawing.Color.Black, 2, LineStyle.Solid);
                 TripPlot.Plot.SetAxisLimits(new AxisLimits(minmaxX[0] - 5, minmaxX[1] + 5, minmaxY[0] - 20, minmaxY[1] + 20), 0, 0);
             }
-            else if (tripSheetModel.TripSheetData.Count() != 0)
+            else if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
                 TripPlot.Plot.AddHorizontalLine(0, System.Drawing.Color.Black, 1, LineStyle.Solid);
             }
@@ -447,6 +458,7 @@ namespace TripSheet_SQLite
             TripPlot.Refresh();
         }// Mouseover method
 
+        // For ScottPlot highlight.
         private MarkerPlot AddMarkerPoint(int[] xy, System.Drawing.Color color, int markerSize, MarkerShape shape, bool visible)
         {
             MarkerPlot marker = new MarkerPlot();
@@ -458,6 +470,7 @@ namespace TripSheet_SQLite
             return marker;
         }
 
+        // ScottPlot mouseover
         private void TripPlot_MouseMove(object sender, MouseEventArgs e)
         {
             string PipeMode1 = RbCE.IsChecked == true ? "Closed Ended" : "Open Ended";
@@ -491,13 +504,6 @@ namespace TripSheet_SQLite
                 }
                 TripPlot.Refresh();
 
-                // Render if the highlighted point changed
-                //if (LastHighlightedIndex2 != pointIndex2)
-                //{
-                //    LastHighlightedIndex2 = pointIndex2;
-                //    TripPlot.Refresh();
-                //}
-
                 if (tbTimeBased.IsChecked == false)
                 {
                     lbMouseover1.Content = $"{PipeMode1}: \t({Math.Round(pointX1, 2)}m³, {Math.Abs(Math.Round(pointY1, 2))}m MD)";
@@ -513,11 +519,6 @@ namespace TripSheet_SQLite
             {
 
             }
-        }
-
-        private void DgTripData_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-
         }
 
         private void BtnNewLine_Click(object sender, RoutedEventArgs e)
@@ -562,16 +563,16 @@ namespace TripSheet_SQLite
                 }
                 foreach (TripSheetData output in input)
                 {
-                    tripSheetModel.TripSheetData.Remove(tripSheetModel.TripSheetData.First(a => a.Id == output.Id));
+                    Startup.sqlSlave.tripSheetModel.TripSheetData.Remove(Startup.sqlSlave.tripSheetModel.TripSheetData.First(a => a.Id == output.Id));
                 }
-                tripSheetModel.SaveChanges();
+                Startup.sqlSlave.tripSheetModel.SaveChanges();
                 Load_TripData();
             }
         }
 
         private void TbTimeBased_Checked(object sender, RoutedEventArgs e)
         {
-            if (tripSheetModel.TripSheetData.Count() != 0)
+            if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -580,7 +581,7 @@ namespace TripSheet_SQLite
         private void RbOpenEnded_Checked(object sender, RoutedEventArgs e)
         {
             ChangeColumns(Visibility.Visible, Visibility.Hidden, primaryColor, secondaryColor, "Open Ended", "Closed Ended");
-            if (tripSheetModel.TripSheetData.Count() != 0)
+            if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }
@@ -588,7 +589,7 @@ namespace TripSheet_SQLite
         private void RbCloseEnded_Checked(object sender, RoutedEventArgs e)
         {
             ChangeColumns(Visibility.Hidden, Visibility.Visible, secondaryColor, primaryColor, "Closed Ended", "Open Ended");
-            if (tripSheetModel.TripSheetData.Count() != 0)
+            if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
                 PlotTheData();
             }

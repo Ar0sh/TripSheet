@@ -1,6 +1,7 @@
 ﻿using HelperLib.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,6 @@ namespace HelperLib
         public SQLSlave()
         {
             tripSheetModel = new TripSheetModel();
-            //List<TripSheetData> tripSheetDatas = tripSheetModel.TripSheetData.OrderBy(a => a.Time).ToList();
         }
 
         public void NewSheet(string name, string details, string wellID, string wellBoreID)
@@ -58,6 +58,52 @@ namespace HelperLib
         public List<TripSheetDetail> LoadSheets()
         {
             return tripSheetModel.TripSheetDetail.OrderBy(a => a.Name).ToList();
+        }
+
+
+        private List<PipeData> exportPipe;
+        private List<CsgData> exportCsg;
+
+        public void RestoreBlankDB(string fullPath = "", bool backup = true)
+        {
+            if (fullPath == "")
+                ExportPipe();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            System.Data.SQLite.SQLiteConnection.ClearAllPools();
+            var directory = Directory.GetCurrentDirectory();
+            if (backup)
+                File.Move(directory + "\\Database\\TripSheet.sqlite", directory + "\\Database\\TripSheet_" + DateTime.Now.ToString("ddMMMyy_HHmmss") + ".sqlite");
+            if (fullPath == "")
+            {
+                File.Copy(directory + "\\Database\\TripSheet_BlankDB.sqlite", directory + "\\Database\\TripSheet.sqlite", true);
+                ImportPipe();
+            }
+            else
+            {
+                File.Copy(fullPath, directory + "\\Database\\TripSheet.sqlite", true);
+            }
+        }
+
+        private void ImportPipe()
+        {
+            foreach (var pipedata in exportPipe)
+            {
+                tripSheetModel.PipeData.Add(pipedata);
+            }
+            foreach (var csgdata in exportCsg)
+            {
+                tripSheetModel.CsgData.Add(csgdata);
+            }
+            exportCsg = null;
+            exportCsg = null;
+            tripSheetModel.SaveChanges();
+        }
+
+        private void ExportPipe()
+        {
+            exportPipe = tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+            exportCsg = tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
         }
     }
 }

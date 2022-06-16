@@ -139,7 +139,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DateConverter.cs" />
-    <Compile Include="DBManager.cs" />
     <Compile Include="DevEnum.cs" />
     <Compile Include="Edit.xaml.cs">
       <DependentUpon>Edit.xaml</DependentUpon>
@@ -147,11 +146,6 @@
     <Compile Include="Loading.xaml.cs">
       <DependentUpon>Loading.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\CsgData.cs" />
-    <Compile Include="Model\PipeData.cs" />
-    <Compile Include="Model\TripSheetData.cs" />
-    <Compile Include="Model\TripSheetDetail.cs" />
-    <Compile Include="Model\TripSheetModel.cs" />
     <Compile Include="Startup.xaml.cs">
       <DependentUpon>Startup.xaml</DependentUpon>
     </Compile>

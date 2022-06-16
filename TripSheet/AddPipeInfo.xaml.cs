@@ -8,15 +8,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using TripSheet_SQLite.Model;
-//using HelperLib.Model;
+using HelperLib.Model;
 
 namespace TripSheet_SQLite
 {
     public partial class AddPipeInfo : Window
     {
-        ObservableCollection<HelperLib.Model.PipeData> _New_DisplacementData = new ObservableCollection<HelperLib.Model.PipeData>();
-        public ObservableCollection<HelperLib.Model.PipeData> New_DisplacementData
+        ObservableCollection<PipeData> _New_DisplacementData = new ObservableCollection<PipeData>();
+        public ObservableCollection<PipeData> New_DisplacementData
         {
             get { return _New_DisplacementData; }
             set
@@ -39,16 +38,16 @@ namespace TripSheet_SQLite
         public AddPipeInfo()
         {
             InitializeComponent();
-            New_DisplacementData = new ObservableCollection<HelperLib.Model.PipeData>();
+            New_DisplacementData = new ObservableCollection<PipeData>();
             LoadPipes();
         }
 
         private void LoadPipes()
         {
             New_DisplacementData.Clear();
-            List<HelperLib.Model.PipeData> displacementDatas = new List<HelperLib.Model.PipeData>();
+            List<PipeData> displacementDatas = new List<PipeData>();
             displacementDatas = Startup.sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.CEDisplacement).ToList();
-            foreach (HelperLib.Model.PipeData dis in displacementDatas)
+            foreach (PipeData dis in displacementDatas)
             {
                 New_DisplacementData.Add(dis);
             }
@@ -56,7 +55,7 @@ namespace TripSheet_SQLite
         }
         private void SavePipeToSql()
         {
-            Startup.sqlSlave.tripSheetModel.PipeData.Add(new HelperLib.Model.PipeData()
+            Startup.sqlSlave.tripSheetModel.PipeData.Add(new PipeData()
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = txtName.Text,
@@ -80,17 +79,17 @@ namespace TripSheet_SQLite
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             IList<DataGridCellInfo> selected = dgPipeData.SelectedCells;
-            List<HelperLib.Model.PipeData> input = new List<HelperLib.Model.PipeData>();
+            List<PipeData> input = new List<PipeData>();
             if (selected.Count > 0)
             {
                 string ExistsError = "These items are in use and locked: ";
                 bool exists = false;
                 foreach (DataGridCellInfo info in selected)
                 {
-                    if (!input.Contains((HelperLib.Model.PipeData)info.Item))
-                        input.Add((HelperLib.Model.PipeData)info.Item);
+                    if (!input.Contains((PipeData)info.Item))
+                        input.Add((PipeData)info.Item);
                 }
-                foreach (HelperLib.Model.PipeData output in input)
+                foreach (PipeData output in input)
                 {
                     exists = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(a => a.PipeId == output.Id) != null ? true : false;
                     if (!exists)
