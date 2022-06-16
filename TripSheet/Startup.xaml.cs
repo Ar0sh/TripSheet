@@ -106,39 +106,64 @@ namespace TripSheet_SQLite
         /// </summary>
         private void EnableUI()
         {
-            string connTest = "a"; // GetCDA.dllInstance.GetValueAsString("WELL_ID");
-            if (connTest == "")
+            try
             {
+                string connTest = GetCDA.dllInstance.GetValueAsString("WELL_ID");
+                if (connTest == "")
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        btnLoad.IsEnabled = false;
+                        btnNew.IsEnabled = false;
+                        btnEdit.IsEnabled = false;
+                        btnBlankDB.IsEnabled = true;
+                        btnRestore.IsEnabled = true;
+                        btnConCDA.Visibility = Visibility.Visible;
+                        btnConCDA.IsEnabled = true;
+                        lbStatus.Content = "Status: CDA not found, message server not running?";
+                        lbStatus.Foreground = Brushes.Red;
+                    });
+                    return;
+                }
                 Dispatcher.Invoke(() =>
                 {
-                    btnLoad.IsEnabled = false;
-                    btnNew.IsEnabled = false;
-                    btnEdit.IsEnabled = false;
+                    btnLoad.IsEnabled = true;
+                    btnNew.IsEnabled = true;
+                    btnDelete.IsEnabled = true;
+                    btnEditPipe.IsEnabled = true;
+                    btnEditCsg.IsEnabled = true;
+                    cbSheets.IsEnabled = true;
+                    btnEdit.IsEnabled = true;
                     btnBlankDB.IsEnabled = true;
                     btnRestore.IsEnabled = true;
-                    btnConCDA.Visibility = Visibility.Visible;
-                    btnConCDA.IsEnabled = true;
-                    lbStatus.Content = "Status: CDA not found, message server not running?";
-                    lbStatus.Foreground = Brushes.Red;
+                    btnConCDA.Visibility = Visibility.Hidden;
+                    btnConCDA.IsEnabled = false;
+                    lbStatus.Content = "Status: No issues...";
+                    lbStatus.Foreground = Brushes.Green;
                 });
-                return;
             }
-            Dispatcher.Invoke(() =>
+            catch
             {
-                btnLoad.IsEnabled = true;
-                btnNew.IsEnabled = true;
-                btnDelete.IsEnabled = true;
-                btnEditPipe.IsEnabled = true;
-                btnEditCsg.IsEnabled = true;
-                cbSheets.IsEnabled = true;
-                btnEdit.IsEnabled = true;
-                btnBlankDB.IsEnabled = true;
-                btnRestore.IsEnabled = true;
-                btnConCDA.Visibility = Visibility.Hidden;
-                btnConCDA.IsEnabled = false;
-                lbStatus.Content = "Status: No issues...";
-                lbStatus.Foreground = Brushes.Green;
-            });
+                if(DevStatus == DevEnum.DEVELOPMENT)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        btnLoad.IsEnabled = true;
+                        btnNew.IsEnabled = true;
+                        btnDelete.IsEnabled = true;
+                        btnEditPipe.IsEnabled = true;
+                        btnEditCsg.IsEnabled = true;
+                        cbSheets.IsEnabled = true;
+                        btnEdit.IsEnabled = true;
+                        btnBlankDB.IsEnabled = true;
+                        btnRestore.IsEnabled = true;
+                        btnConCDA.Visibility = Visibility.Hidden;
+                        btnConCDA.IsEnabled = false;
+                        lbStatus.Content = "Status: No issues...(DEVELOPMENT)";
+                        lbStatus.Foreground = Brushes.Green;
+                    });
+                }
+            }
         }
 
         /// <summary>
