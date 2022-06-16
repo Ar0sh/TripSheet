@@ -6,6 +6,15 @@
 <h3>PS</h3>
 <p>Not usable as standalone, requires proprietary dll and system to grab live data.</p>
 
+<h3>Info</h3>
+<p>Start window:</p>
 <img src="https://user-images.githubusercontent.com/73751609/173798008-4e6232d9-98cc-4175-8f18-6d0213c76fcf.png">
 
-<img src="https://user-images.githubusercontent.com/73751609/173661693-1f6d1b54-1be3-4acd-9917-9c847a261afb.png">
+<p>Sheet UI, green cell editable (selected/mouseover):</p>
+<img src="https://user-images.githubusercontent.com/73751609/174132222-aeb97728-80de-42fa-be13-4c8bc7678cd3.png">
+
+<p>Red cell not editable (Mouseover/selected):</p>
+<img src="https://user-images.githubusercontent.com/73751609/174133259-0522bf1c-1d3d-44df-8137-2b4cc73a4344.png">
+
+<p>Ctl+a, shows all cells and if they are editable or not:</p>
+<img src="https://user-images.githubusercontent.com/73751609/174132726-f17ef09d-e0c1-48fe-8447-ce549a99513f.png">
