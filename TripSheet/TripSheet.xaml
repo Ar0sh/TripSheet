@@ -15,13 +15,46 @@
         <local:DateConverter x:Key="dateConverter"/>
     </Window.Resources>
     <Grid Margin="0,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="900"/>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition MinWidth="250"/>
         </Grid.ColumnDefinitions>
-        <DataGrid TabIndex="10" x:Name="dgTripData"
-                        Grid.Column="0"
+        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+            <Menu>
+                <MenuItem Header="File">
+                    <MenuItem x:Name="mnuExit" Header="Close Sheet" Click="MnuExit_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/Back.ico"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem x:Name="mnuShutDown" Header="Exit Program" Click="MnuShutDown_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/Exit.ico"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Info">
+                    <MenuItem x:Name="mnuHelp" Header="Help" Click="MnuHelp_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/QuestionMark.ico"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="mnuAbout" Header="About" Click="MnuAbout_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/ExpleMark.ico"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+            </Menu>
+        </Grid>
+        <Grid  Grid.Column="0" Grid.Row="1">
+            <DataGrid TabIndex="10" x:Name="dgTripData"
                         ItemsSource="{Binding New_TripSheetInput}"
                         SelectedItem="{Binding SelectedItem, ElementName=dgTripData, Mode=TwoWay}"
                         CanUserAddRows="False"
@@ -32,149 +65,158 @@
                         CellEditEnding="DgTripData_CellEditEnding"
                         IsSynchronizedWithCurrentItem="True"
                         FontWeight="Normal" Margin="10,70,5,10">
-            <DataGrid.Resources>
-                <Style x:Key="tbStyle" TargetType="{x:Type TextBlock}">
-                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                </Style>
-                <Style x:Key="errorStyle" TargetType="{x:Type TextBox}">
-                    <Setter Property="Padding" Value="-2"/>
-                    <Style.Triggers>
-                        <Trigger Property="Validation.HasError" Value="True">
-                            <Setter Property="Background" Value="Red"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="ToolTip" 
+                <DataGrid.Resources>
+                    <Style x:Key="tbStyle" TargetType="{x:Type TextBlock}">
+                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                    </Style>
+                    <Style x:Key="errorStyle" TargetType="{x:Type TextBox}">
+                        <Setter Property="Padding" Value="-2"/>
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="Background" Value="Red"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="ToolTip" 
                                             Value="{Binding RelativeSource={RelativeSource Self},
                                             Path=(Validation.Errors)[0].ErrorContent}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-                <Style x:Key="EditableCells" TargetType="DataGridCell">
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource EditOK}"/>
-                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
-                        </Trigger>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsSelected" Value="true" />
-                                <Condition Property="Selector.IsSelectionActive" Value="true" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="Background" Value="{StaticResource EditOK}"/>
-                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
-                        </MultiTrigger>
-                        <Trigger Property="IsFocused" Value="True">
-                            <Setter Property="Background" Value="{StaticResource EditOK}"/>
-                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow" >
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SelectedRow}"/>
-                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
-                        </Trigger>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsSelected" Value="true" />
-                                <Condition Property="Selector.IsSelectionActive" Value="true" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="Background" Value="{StaticResource EditNotOK}"/>
-                            <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#FFE06363"/>
-                            <Setter Property="Foreground" Value="Black"/>
-                        </Trigger>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsSelected" Value="true" />
-                                <Condition Property="Selector.IsSelectionActive" Value="true" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="Background" Value="#FFE06363"/>
-                            <Setter Property="Foreground" Value="Black" />
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.CellStyle>
-            <DataGrid.Columns>
-                <DataGridTextColumn x:Name="colTime" Width="150" Header="Time" IsReadOnly="True" 
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style x:Key="EditableCells" TargetType="DataGridCell">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource EditOK}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="true" />
+                                    <Condition Property="Selector.IsSelectionActive" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="{StaticResource EditOK}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Background" Value="{StaticResource EditOK}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" >
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource SelectedRow}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="true" />
+                                    <Condition Property="Selector.IsSelectionActive" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="{StaticResource EditNotOK}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DefaultFG}"/>
+                            </MultiTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FFE06363"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="true" />
+                                    <Condition Property="Selector.IsSelectionActive" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="#FFE06363"/>
+                                <Setter Property="Foreground" Value="Black" />
+                            </MultiTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn x:Name="colTime" Width="150" Header="Time" IsReadOnly="True" 
                                     Binding="{Binding Time, Converter={StaticResource dateConverter}}"/>
-                <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)" 
+                    <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)" 
                                     EditingElementStyle="{StaticResource errorStyle}" ElementStyle="{StaticResource tbStyle}"
                                     Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat='0.00'}"
                                     CellStyle="{StaticResource EditableCells}"/>
-                <DataGridTextColumn x:Name="colTripVol" Width="100"  Header="Trip Vol.(m³)" 
+                    <DataGridTextColumn x:Name="colTripVol" Width="100"  Header="Trip Vol.(m³)" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, StringFormat='0.00'}"
                                     CellStyle="{StaticResource EditableCells}"/>
-                <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" 
+                    <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, StringFormat='0.00'}" 
                                     CellStyle="{StaticResource EditableCells}"/>
-                <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" 
+                    <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, StringFormat='0.00'}" 
                                     CellStyle="{StaticResource EditableCells}"/>
-                <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" 
+                    <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, StringFormat='0.00'}"
                                      CellStyle="{StaticResource EditableCells}"/>
-                <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" 
+                    <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding ActualVolume, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colTheoretical_OE" Width="70" Header="Theor. Vol." IsReadOnly="True" 
+                    <DataGridTextColumn x:Name="colTheoretical_OE" Width="70" Header="Theor. Vol." IsReadOnly="True" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_OE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colTheoretical_CE" Width="70" Header="Theor. Vol." IsReadOnly="True" 
+                    <DataGridTextColumn x:Name="colTheoretical_CE" Width="70" Header="Theor. Vol." IsReadOnly="True" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding TheoreticalVol_CE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colDiff_OE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_OE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colDiff_CE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_CE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colCumDiff_OE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_OE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colCumDiff_CE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_CE, StringFormat='0.00 m³'}"/>
-                <DataGridTextColumn x:Name="colLossGain_OE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_OE, StringFormat='0.00 m³/hr'}"/>
-                <DataGridTextColumn x:Name="colLossGain_CE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_CE, StringFormat='0.00 m³/hr'}"/>
-                <DataGridTextColumn Header="ID" Width="20" Binding="{Binding Id}" IsReadOnly="True" Visibility="Collapsed"/>
-                <DataGridTextColumn Header="PipeID" Width="20" Binding="{Binding PipeId}" IsReadOnly="True" Visibility="Collapsed"/>
-            </DataGrid.Columns>
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Copy" Command="Copy"/>
-                    <MenuItem Header="Paste" Command="Paste"/>
-                    <MenuItem Header="Cut" Command="Cut"/>
-                    <Span/>
-                    <MenuItem Header="Delete" Click="Delete_Click"/>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-        </DataGrid>
-        <Button TabIndex="9" x:Name="btnNewLine" Grid.Column="0" Content="New line" Height="25" Margin="0,40,5,0" VerticalAlignment="Top" Click="BtnNewLine_Click" HorizontalAlignment="Right" Width="80"/>
-        <ComboBox TabIndex="4" x:Name="cbPipe" Grid.Column="0" Height="25" Margin="184,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbPipe_SelectionChanged"
+                    <DataGridTextColumn x:Name="colDiff_OE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_OE, StringFormat='0.00 m³'}"/>
+                    <DataGridTextColumn x:Name="colDiff_CE" Width="60" Header="Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding Diff_CE, StringFormat='0.00 m³'}"/>
+                    <DataGridTextColumn x:Name="colCumDiff_OE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_OE, StringFormat='0.00 m³'}"/>
+                    <DataGridTextColumn x:Name="colCumDiff_CE" Width="60" Header="Tot.Diff." IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding TotDiff_CE, StringFormat='0.00 m³'}"/>
+                    <DataGridTextColumn x:Name="colLossGain_OE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_OE, StringFormat='0.00 m³/hr'}"/>
+                    <DataGridTextColumn x:Name="colLossGain_CE" Width="*" Header="Gain/Loss" IsReadOnly="True" ElementStyle="{StaticResource tbStyle}" Binding="{Binding LossGainRate_CE, StringFormat='0.00 m³/hr'}"/>
+                    <DataGridTextColumn Header="ID" Width="20" Binding="{Binding Id}" IsReadOnly="True" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="PipeID" Width="20" Binding="{Binding PipeId}" IsReadOnly="True" Visibility="Collapsed"/>
+                </DataGrid.Columns>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Copy" Command="Copy"/>
+                        <MenuItem Header="Paste" Command="Paste"/>
+                        <MenuItem Header="Cut" Command="Cut"/>
+                        <Span/>
+                        <MenuItem Header="Delete" Click="Delete_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
+            <Button TabIndex="9" x:Name="btnNewLine" Content="New line" Height="25" Margin="0,40,5,0" VerticalAlignment="Top" Click="BtnNewLine_Click" HorizontalAlignment="Right" Width="80"/>
+            <ComboBox TabIndex="4" x:Name="cbPipe" Height="25" Margin="184,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbPipe_SelectionChanged"
                   ItemsSource="{Binding pipeList}"
                   DisplayMemberPath="Name"/>
-        <ComboBox TabIndex="5" x:Name="cbCsg" Grid.Column="0" Height="25" Margin="184,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbCsg_SelectionChanged"
+            <ComboBox TabIndex="5" x:Name="cbCsg" Height="25" Margin="184,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="184" SelectionChanged="CbCsg_SelectionChanged"
             ItemsSource="{Binding csgList}"
             DisplayMemberPath="Name"/>
-        <Button TabIndex="0" x:Name="btnAddPipe" Grid.Column="0" Content="Add Pipe Info" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddPipe_Click" Height="25"/>
-        <Button TabIndex="1" x:Name="btnAddCsg" Grid.Column="0" Content="Add Csg Info" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddCsg_Click" Height="25"/>
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
-        <WpfPlot Name="TripPlot" Grid.Column="2" MouseMove="TripPlot_MouseMove" Margin="5,10,10,78" />
-        <CheckBox TabIndex="8" x:Name="tbTimeBased" Grid.Column="0" Checked="TbTimeBased_Checked" Unchecked="TbTimeBased_Checked" Content="Time plot" Margin="0,16,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
-        <Label Content="OE Disp:" HorizontalAlignment="Left" Margin="373,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="CE Disp:" HorizontalAlignment="Left" Margin="373,39,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbOE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,10,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="tbCE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,39,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
-        <RadioButton TabIndex="6" x:Name="RbOE" Content="Open Ended" Checked="RbOpenEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,10,0,0" VerticalAlignment="Top" Height="25"/>
-        <RadioButton TabIndex="7" x:Name="RbCE" Content="Closed Ended" Checked="RbCloseEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,40,0,0" VerticalAlignment="Top" Height="25"/>
-        <RadioButton TabIndex="2" x:Name="RbPipe" Content="Pipe" Checked="RbPipe_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,10,0,0" VerticalAlignment="Top" Height="25"/>
-        <RadioButton TabIndex="3" x:Name="RbCsg" Content="Casing" Checked="RbCsg_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,40,0,0" VerticalAlignment="Top" Height="25"/>
-        <Label x:Name="lbMouseover1" Grid.Column="2" Content="Primary: " Margin="5,0,10,36" Height="26" VerticalAlignment="Bottom"/>
-        <Label x:Name="lbMouseover2" Grid.Column="2" Content="Secondary: " Margin="5,0,10,10" Height="26" VerticalAlignment="Bottom"/>
-        <Label Content="l/m" HorizontalAlignment="Left" Margin="547,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="l/m" HorizontalAlignment="Left" Margin="547,39,0,0" VerticalAlignment="Top"/>
+            <Button TabIndex="0" x:Name="btnAddPipe" Content="Add Pipe Info" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddPipe_Click" Height="25"/>
+            <Button TabIndex="1" x:Name="btnAddCsg" Content="Add Csg Info" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="110" Click="BtnAddCsg_Click" Height="25"/>
+            <CheckBox TabIndex="8" x:Name="tbTimeBased" Checked="TbTimeBased_Checked" Unchecked="TbTimeBased_Checked" Content="Time plot" Margin="0,16,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
+            <Label Content="OE Disp:" HorizontalAlignment="Left" Margin="373,10,0,0" VerticalAlignment="Top"/>
+            <Label Content="CE Disp:" HorizontalAlignment="Left" Margin="373,39,0,0" VerticalAlignment="Top"/>
+            <TextBox x:Name="tbOE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,10,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
+            <TextBox x:Name="tbCE" BorderThickness="2" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="26" Margin="427,39,0,0" TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top" Width="120"/>
+            <RadioButton TabIndex="6" x:Name="RbOE" Content="Open Ended" Checked="RbOpenEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,10,0,0" VerticalAlignment="Top" Height="25"/>
+            <RadioButton TabIndex="7" x:Name="RbCE" Content="Closed Ended" Checked="RbCloseEnded_Checked" GroupName="Displacement" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="580,40,0,0" VerticalAlignment="Top" Height="25"/>
+            <RadioButton TabIndex="2" x:Name="RbPipe" Content="Pipe" Checked="RbPipe_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,10,0,0" VerticalAlignment="Top" Height="25"/>
+            <RadioButton TabIndex="3" x:Name="RbCsg" Content="Casing" Checked="RbCsg_Checked" GroupName="PipeCsg" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="125,40,0,0" VerticalAlignment="Top" Height="25"/>
+            <Label Content="l/m" HorizontalAlignment="Left" Margin="547,10,0,0" VerticalAlignment="Top"/>
+            <Label Content="l/m" HorizontalAlignment="Left" Margin="547,39,0,0" VerticalAlignment="Top"/>
+        </Grid>
+        <Grid  Grid.Column="2" Grid.RowSpan="2">
+            <WpfPlot Name="TripPlot" MouseMove="TripPlot_MouseMove" Margin="0,0,0,42" />
+            <!--<Label x:Name="lbMouseover1" Content="Primary: " Margin="5,0,10,36" Height="26" VerticalAlignment="Bottom"/>-->
+            <!--<Label x:Name="lbMouseover2" Content="Secondary: " Margin="5,0,10,10" Height="26" VerticalAlignment="Bottom"/>-->
+            <StatusBar Height="22" VerticalAlignment="Bottom" Margin="0,0,0,20" Background="{x:Null}" BorderThickness="0,1,0,0" BorderBrush="LightGray">
+                <TextBlock x:Name="lbMouseover1" Text="Primary: " VerticalAlignment="Center"/>
+            </StatusBar>
+            <StatusBar Height="22" VerticalAlignment="Bottom" Background="{x:Null}">
+                <TextBlock x:Name="lbMouseover2" Text="Secondary: " VerticalAlignment="Center"/>
+            </StatusBar>
+        </Grid>
+        <GridSplitter Grid.Column="1" Width="5" Grid.Row="1" HorizontalAlignment="Stretch"/>
     </Grid>
 </Window>

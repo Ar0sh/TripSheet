@@ -64,6 +64,8 @@ namespace HelperLib
         private List<PipeData> exportPipe;
         private List<CsgData> exportCsg;
 
+        public delegate void teetet(int abd);
+
         public void RestoreBlankDB(string fullPath = "", bool backup = true)
         {
             if (fullPath == "")

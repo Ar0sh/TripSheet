@@ -10,20 +10,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace TripSheet_SQLite
 {
     /// <summary>
-    /// Interaction logic for Loading.xaml
+    /// Interaction logic for About.xaml
     /// </summary>
-    public partial class Loading : UserControl
+    public partial class About : Window
     {
-        public Loading()
+        public About()
         {
             InitializeComponent();
-            
+            lbHeader.Content = "TripSheet " + Startup.Version + " by Frode Ulriksen";
         }
     }
 }

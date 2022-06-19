@@ -1,0 +1,14 @@
+﻿<Window x:Class="TripSheet_SQLite.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TripSheet_SQLite"
+        mc:Ignorable="d"
+        Title="About" Height="126.984" Width="554.762" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen">
+    <Grid Height="105" VerticalAlignment="Top">
+        <Label x:Name="lbHeader" Content="TripSheet" FontWeight="Bold" Height="30" HorizontalContentAlignment="Center" Margin="0,10,0,65"/>
+        <Label Content="Used to track well volumes during tripping operations." Height="25" HorizontalContentAlignment="Center" Margin="0,40"/>
+        <Label Content="Please refer to the help document in info menu for more information about the TripSheet program." Height="25" HorizontalContentAlignment="Center" Margin="0,65,0,15"/>
+    </Grid>
+</Window>

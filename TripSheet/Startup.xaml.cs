@@ -11,7 +11,9 @@ using HelperLib.Model;
 using HelperLib;
 using System.IO;
 using Microsoft.Win32;
-
+using System.Windows.Data;
+using System.Globalization;
+using System.Diagnostics;
 
 namespace TripSheet_SQLite
 {
@@ -20,7 +22,7 @@ namespace TripSheet_SQLite
         public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
 
         // Public variables.
-        public static string Version = "v0.79";
+        public static string Version = "v0.82";
         public static CDAconn GetCDA;
         public static dynamic dllInstance;
         public static SQLSlave sqlSlave;
@@ -106,64 +108,39 @@ namespace TripSheet_SQLite
         /// </summary>
         private void EnableUI()
         {
-            try
+            string connTest = "a"; // GetCDA.dllInstance.GetValueAsString("WELL_ID");
+            if (connTest == "")
             {
-                string connTest = GetCDA.dllInstance.GetValueAsString("WELL_ID");
-                if (connTest == "")
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        btnLoad.IsEnabled = false;
-                        btnNew.IsEnabled = false;
-                        btnEdit.IsEnabled = false;
-                        btnBlankDB.IsEnabled = true;
-                        btnRestore.IsEnabled = true;
-                        btnConCDA.Visibility = Visibility.Visible;
-                        btnConCDA.IsEnabled = true;
-                        lbStatus.Content = "Status: CDA not found, message server not running?";
-                        lbStatus.Foreground = Brushes.Red;
-                    });
-                    return;
-                }
                 Dispatcher.Invoke(() =>
                 {
-                    btnLoad.IsEnabled = true;
-                    btnNew.IsEnabled = true;
-                    btnDelete.IsEnabled = true;
-                    btnEditPipe.IsEnabled = true;
-                    btnEditCsg.IsEnabled = true;
-                    cbSheets.IsEnabled = true;
-                    btnEdit.IsEnabled = true;
+                    btnLoad.IsEnabled = false;
+                    btnNew.IsEnabled = false;
+                    btnEdit.IsEnabled = false;
                     btnBlankDB.IsEnabled = true;
                     btnRestore.IsEnabled = true;
-                    btnConCDA.Visibility = Visibility.Hidden;
-                    btnConCDA.IsEnabled = false;
-                    lbStatus.Content = "Status: No issues...";
-                    lbStatus.Foreground = Brushes.Green;
+                    btnConCDA.Visibility = Visibility.Visible;
+                    btnConCDA.IsEnabled = true;
+                    lbStatus.Text = "Status: CDA not found, message server not running?";
+                    lbStatus.Foreground = Brushes.Red;
                 });
+                return;
             }
-            catch
+            Dispatcher.Invoke(() =>
             {
-                if(DevStatus == DevEnum.DEVELOPMENT)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        btnLoad.IsEnabled = true;
-                        btnNew.IsEnabled = true;
-                        btnDelete.IsEnabled = true;
-                        btnEditPipe.IsEnabled = true;
-                        btnEditCsg.IsEnabled = true;
-                        cbSheets.IsEnabled = true;
-                        btnEdit.IsEnabled = true;
-                        btnBlankDB.IsEnabled = true;
-                        btnRestore.IsEnabled = true;
-                        btnConCDA.Visibility = Visibility.Hidden;
-                        btnConCDA.IsEnabled = false;
-                        lbStatus.Content = "Status: No issues...(DEVELOPMENT)";
-                        lbStatus.Foreground = Brushes.Green;
-                    });
-                }
-            }
+                btnLoad.IsEnabled = true;
+                btnNew.IsEnabled = true;
+                btnDelete.IsEnabled = true;
+                btnEditPipe.IsEnabled = true;
+                btnEditCsg.IsEnabled = true;
+                cbSheets.IsEnabled = true;
+                btnEdit.IsEnabled = true;
+                btnBlankDB.IsEnabled = true;
+                btnRestore.IsEnabled = true;
+                btnConCDA.Visibility = Visibility.Hidden;
+                btnConCDA.IsEnabled = false;
+                lbStatus.Text = "Status: No issues...";
+                lbStatus.Foreground = Brushes.Green;
+            });
         }
 
         /// <summary>
@@ -246,7 +223,14 @@ namespace TripSheet_SQLite
                 Hide();
                 TripSheet tripSheet = new TripSheet(((TripSheetDetail)cbSheets.SelectedItem).Id, ((TripSheetDetail)cbSheets.SelectedItem).Name);
                 tripSheet.ShowDialog();
-                Show();
+                try
+                {
+                    Show();
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -436,6 +420,22 @@ namespace TripSheet_SQLite
             {
                 MessageBox.Show("Cannot restore DB", "DB Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void MnuShutDown_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void MnuAbout_Click(object sender, RoutedEventArgs e)
+        {
+            About about = new About();
+            about.ShowDialog();
+        }
+
+        private void MnuHelp_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Directory.GetCurrentDirectory() + "\\Help\\TripSheet.pdf");
         }
     }
 }

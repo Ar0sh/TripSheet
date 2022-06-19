@@ -13,6 +13,10 @@ using HelperLib.Model;
 using Calculations;
 using System.Windows.Media;
 using ScottPlot;
+using System.Globalization;
+using System.Windows.Data;
+using System.Diagnostics;
+using System.Windows.Controls.Primitives;
 
 namespace TripSheet_SQLite
 {
@@ -29,6 +33,7 @@ namespace TripSheet_SQLite
         Brush secondaryColor = Brushes.Red;
         System.Drawing.Color primaryColorPlot = System.Drawing.Color.Green;
         System.Drawing.Color secondaryColorPlot = System.Drawing.Color.Red;
+        DataGridCellInfo cellInfo;
         // X, Y, XT(Time X axis) data sets for plot
         List<double> dataLX1 = new List<double>();
         List<double> dataLX2 = new List<double>();
@@ -49,6 +54,8 @@ namespace TripSheet_SQLite
         private ScatterPlot MyScatterPlot2;
         ObservableCollection<TripSheetData> _New_TripSheetInput = new ObservableCollection<TripSheetData>();
 
+        int cellRow;
+        int cellColumn;
         /// <summary>
         /// TripSheetInput dataset, ObservableCollection so it notifies if added, modified or deleted.
         /// </summary>
@@ -179,6 +186,8 @@ namespace TripSheet_SQLite
         // Load trip table data
         private void Load_TripData()
         {
+            //var _ = selectionchanged;
+            //selectionchanged = false;
             New_TripSheetInput.Clear();
             List<TripSheetData> tripSheetDatas = Startup.sqlSlave.tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList();
             if (tripSheetDatas.Count == 0 && tbCE.Text != "")
@@ -186,7 +195,10 @@ namespace TripSheet_SQLite
                 TripSheetData zeroItem = new TripSheetData();
                 EnterTripData(zeroItem, null, true);
                 Startup.sqlSlave.tripSheetModel.TripSheetData.Add(zeroItem);
+                New_TripSheetInput.Add(zeroItem);
                 SaveToSql();
+
+                //SaveToSql();
             }
             if (tripSheetDatas.Count > 0)
             {
@@ -208,6 +220,8 @@ namespace TripSheet_SQLite
             {
                 PlotTheData();
             }
+            //dgTripData.Items.Refresh();
+            //selectionchanged = _;
         }
 
         // Set new tripsheetdata items values, if first entry or not.
@@ -235,8 +249,9 @@ namespace TripSheet_SQLite
         }
 
         // Update trip data table
-        private void UpdateSheet()
+        private void UpdateSheet(int row = -1)
         {
+            //dgTripData.Items.Refresh();
             int k = dgTripData.Items.Count;
             TripSheetData tnew = (TripSheetData)dgTripData.Items[k - 1];
             TripSheetData tbefore = k != 1 ? (TripSheetData)dgTripData.Items[k - 2] : null;
@@ -282,7 +297,7 @@ namespace TripSheet_SQLite
                 {
                     MessageBox.Show("Bit depth");
                 }
-                SaveToSql();
+                SaveToSql(row);
             }
             if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
             {
@@ -295,56 +310,47 @@ namespace TripSheet_SQLite
         /// <summary>
         /// Save new row to database, or update edited item.
         /// </summary>
-        private void SaveToSql()
+        private void SaveToSql(int row = -1, bool firstLineEdit = false)
         {
-            bool firstLineEdit = false;
             List<TripSheetData> list_tripSheetData = New_TripSheetInput.OrderBy(des => des.Time).ToList();
-            for (int i = 0; i < list_tripSheetData.Count; i++)
+            while(row != -1)
             {
-                var id = list_tripSheetData[i].Id;
+                var id = list_tripSheetData[row].Id;
                 var editItem = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
-                if (list_tripSheetData[i].Id != "" && list_tripSheetData[i].Id != null && editItem != null)
+                editItem.Time = list_tripSheetData[row].Time;
+                editItem.BDepth = list_tripSheetData[row].BDepth;
+                editItem.TripVolume = list_tripSheetData[row].TripVolume;
+                editItem.EmptyFill = list_tripSheetData[row].EmptyFill;
+                editItem.Displacement_OE = list_tripSheetData[row].Displacement_OE;
+                editItem.Displacement_CE = list_tripSheetData[row].Displacement_CE;
+                if (row == 0)
                 {
-                    if (list_tripSheetData[i].TripVolume != null &&
-                        (list_tripSheetData[i].TripVolume != editItem.TripVolume ||
-                        list_tripSheetData[i].EmptyFill != editItem.EmptyFill ||
-                        list_tripSheetData[i].BDepth != editItem.BDepth ||
-                        list_tripSheetData[i].Time != editItem.Time ||
-                        list_tripSheetData[i].Displacement_OE != editItem.Displacement_OE ||
-                        list_tripSheetData[i].Displacement_CE != editItem.Displacement_CE ||
-                        firstLineEdit))
+                    // Set line 0 to be all zeroes due to start point.
+                    CalculateTripData(editItem, null, false);
+                    if (list_tripSheetData.Count > 1)
                     {
-                        editItem.Time = list_tripSheetData[i].Time;
-                        editItem.BDepth = list_tripSheetData[i].BDepth;
-                        editItem.TripVolume = list_tripSheetData[i].TripVolume;
-                        editItem.EmptyFill = list_tripSheetData[i].EmptyFill;
-                        editItem.Displacement_OE = list_tripSheetData[i].Displacement_OE;
-                        editItem.Displacement_CE = list_tripSheetData[i].Displacement_CE;
-                        if (i == 0)
+                        row++;
+                        continue;
+                    }
+                }
+                else
+                {
+                    TripSheetData tbefore = list_tripSheetData[row - 1];
+                    CalculateTripData(editItem, tbefore);
+                    CalculateTripData(list_tripSheetData[row], editItem, false);
+                    if (row != list_tripSheetData.Count - 1)
+                    {
+                        for (int j = row; j < list_tripSheetData.Count; j++)
                         {
-                            // Set line 0 to be all zeroes due to start point.
-                            CalculateTripData(editItem, null, false);
-                            firstLineEdit = true;
-                            // Skip rest of for loop and go to next iteration
-                            continue;
-                        }
-
-                        TripSheetData tbefore = list_tripSheetData[i - 1];
-                        CalculateTripData(editItem, tbefore);
-                        CalculateTripData(list_tripSheetData[i], editItem, false);
-                        if (i != list_tripSheetData.Count - 1)
-                        {
-                            for (int j = i + 1; j < list_tripSheetData.Count; j++)
-                            {
-                                var idj = list_tripSheetData[j].Id;
-                                var idb = list_tripSheetData[j - 1].Id;
-                                var editItemj = Startup.sqlSlave.tripSheetModel.TripSheetData.First(item => item.Id == idj);
-                                var beforeItem = Startup.sqlSlave.tripSheetModel.TripSheetData.First(item => item.Id == idb);
-                                CalculateTripData(editItemj, beforeItem);
-                            }
+                            var idj = list_tripSheetData[j].Id;
+                            var editItemj = Startup.sqlSlave.tripSheetModel.TripSheetData.First(item => item.Id == idj);
+                            var beforeItem = list_tripSheetData[j - 1];
+                            CalculateTripData(editItemj, beforeItem);
+                            CalculateTripData(list_tripSheetData[j], editItemj, false);
                         }
                     }
                 }
+                row = -1;
             }
             try
             {
@@ -355,7 +361,7 @@ namespace TripSheet_SQLite
             {
                 string exem = ex.Message;
             }
-            Load_TripData();
+            dgTripData.Items.Refresh();
         }
 
         // Volume calculations
@@ -506,13 +512,13 @@ namespace TripSheet_SQLite
 
                 if (tbTimeBased.IsChecked == false)
                 {
-                    lbMouseover1.Content = $"{PipeMode1}: \t({Math.Round(pointX1, 2)}m³, {Math.Abs(Math.Round(pointY1, 2))}m MD)";
-                    lbMouseover2.Content = $"{PipeMode2}: \t({Math.Round(pointX2, 2)}m³, {Math.Abs(Math.Round(pointY2, 2))}m MD)";
+                    lbMouseover1.Text = $"{PipeMode1}: \t({Math.Round(pointX1, 2)}m³, {Math.Abs(Math.Round(pointY1, 2))}m MD)";
+                    lbMouseover2.Text = $"{PipeMode2}: \t({Math.Round(pointX2, 2)}m³, {Math.Abs(Math.Round(pointY2, 2))}m MD)";
                 }
                 else
                 {
-                    lbMouseover1.Content = $"{PipeMode1}: \t({DateTime.FromOADate(pointX1)}, {Math.Round(pointY1, 2)}m³)";
-                    lbMouseover2.Content = $"{PipeMode2}: \t({DateTime.FromOADate(pointX2)}, {Math.Round(pointY2, 2)}m³)";
+                    lbMouseover1.Text = $"{PipeMode1}: \t({DateTime.FromOADate(pointX1)}, {Math.Round(pointY1, 2)}m³)";
+                    lbMouseover2.Text = $"{PipeMode2}: \t({DateTime.FromOADate(pointX2)}, {Math.Round(pointY2, 2)}m³)";
                 }
             }
             catch
@@ -610,8 +616,8 @@ namespace TripSheet_SQLite
             RbCE.Foreground = ColClosedEnded;
             lbMouseover1.Foreground = primaryColor;
             lbMouseover2.Foreground = secondaryColor;
-            lbMouseover1.Content = $"{primary}:";
-            lbMouseover2.Content = $"{secondary}:";
+            lbMouseover1.Text = $"{primary}:";
+            lbMouseover2.Text = $"{secondary}:";
         }
 
         private void RbPipe_Checked(object sender, RoutedEventArgs e)
@@ -664,12 +670,40 @@ namespace TripSheet_SQLite
         {
             if (Edit == true)
             {
+                try
+                {
+                    cellInfo = dgTripData.SelectedCells[0];
+                }
+                catch { }
+                //cellColumn = cellInfo.Column.DisplayIndex;
+                cellRow = dgTripData.Items.IndexOf(cellInfo.Item);
                 Edit = false;
                 dgTripData.CommitEdit();
                 dgTripData.CommitEdit();
-                UpdateSheet();
-                Edit = true;
+                UpdateSheet(cellRow);
             }
+            Edit = true;
+        }
+
+        private void MnuExit_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void MnuShutDown_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void MnuAbout_Click(object sender, RoutedEventArgs e)
+        {
+            About about = new About();
+            about.ShowDialog();
+        }
+
+        private void MnuHelp_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Directory.GetCurrentDirectory() + "\\Help\\TripSheet.pdf");
         }
     }
 }
