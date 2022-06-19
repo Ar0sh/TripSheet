@@ -186,8 +186,6 @@ namespace TripSheet_SQLite
         // Load trip table data
         private void Load_TripData()
         {
-            //var _ = selectionchanged;
-            //selectionchanged = false;
             New_TripSheetInput.Clear();
             List<TripSheetData> tripSheetDatas = Startup.sqlSlave.tripSheetModel.TripSheetData.Where(b => b.SheetId == SheetGuid).OrderBy(a => a.Time).ToList();
             if (tripSheetDatas.Count == 0 && tbCE.Text != "")
@@ -197,8 +195,6 @@ namespace TripSheet_SQLite
                 Startup.sqlSlave.tripSheetModel.TripSheetData.Add(zeroItem);
                 New_TripSheetInput.Add(zeroItem);
                 SaveToSql();
-
-                //SaveToSql();
             }
             if (tripSheetDatas.Count > 0)
             {
@@ -220,8 +216,6 @@ namespace TripSheet_SQLite
             {
                 PlotTheData();
             }
-            //dgTripData.Items.Refresh();
-            //selectionchanged = _;
         }
 
         // Set new tripsheetdata items values, if first entry or not.
@@ -251,7 +245,6 @@ namespace TripSheet_SQLite
         // Update trip data table
         private void UpdateSheet(int row = -1)
         {
-            //dgTripData.Items.Refresh();
             int k = dgTripData.Items.Count;
             TripSheetData tnew = (TripSheetData)dgTripData.Items[k - 1];
             TripSheetData tbefore = k != 1 ? (TripSheetData)dgTripData.Items[k - 2] : null;

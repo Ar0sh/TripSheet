@@ -19,7 +19,7 @@ namespace TripSheet_SQLite
 {
     public partial class Startup : Window
     {
-        public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
+        public static DevEnum DevStatus = DevEnum.RELEASE;
 
         // Public variables.
         public static string Version = "v0.82";
