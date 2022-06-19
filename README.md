@@ -8,10 +8,10 @@
 
 <h3>Info</h3>
 <p>Start window:</p>
-<img src="https://user-images.githubusercontent.com/73751609/173798008-4e6232d9-98cc-4175-8f18-6d0213c76fcf.png">
+<img src="https://user-images.githubusercontent.com/73751609/174501015-c088119a-293c-4157-9567-61ef00c92eb6.png">
 
 <p>Sheet UI, green cell editable (selected/mouseover):</p>
-<img src="https://user-images.githubusercontent.com/73751609/174132222-aeb97728-80de-42fa-be13-4c8bc7678cd3.png">
+<img src="https://user-images.githubusercontent.com/73751609/174501042-bddc9a04-44a7-4a26-abdf-512aca8cf823.png">
 
 <p>Red cell not editable (Mouseover/selected):</p>
 <img src="https://user-images.githubusercontent.com/73751609/174133259-0522bf1c-1d3d-44df-8137-2b4cc73a4344.png">
