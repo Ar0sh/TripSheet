@@ -46,12 +46,13 @@ namespace TripSheet_SQLite
         double[] dataY1;
         double[] dataY2;
         double[] dataXT;
-        // ScottPlot variables and Highligths
+        // ScottPlot variables and Highlights
         private MarkerPlot[] HighlightedPoint = new MarkerPlot[2];
         System.Drawing.Color[] colors = new System.Drawing.Color[] { System.Drawing.Color.Black, System.Drawing.Color.Orange };
         private int[] LastHighlightedIndex = { -1, -1 };
         private ScatterPlot MyScatterPlot1;
         private ScatterPlot MyScatterPlot2;
+        ContextMenu rightClickMenu;
         ObservableCollection<TripSheetData> _New_TripSheetInput = new ObservableCollection<TripSheetData>();
 
         int cellRow;
@@ -138,12 +139,12 @@ namespace TripSheet_SQLite
                 TripPlot.Plot.SaveFig(saveFileDialog.FileName);
             }
         }
-        // Open seperate plot window.
+        // Open separate plot window.
         private void OpenPlotWindow(object sender, RoutedEventArgs e)
         {
             WpfPlotViewer wpfPlotViewer = new WpfPlotViewer(TripPlot.Plot)
             {
-                Title = "Depth Based Plot"
+                Title = "Tripping Plot"
             };
             wpfPlotViewer.Show();
         }
@@ -318,7 +319,7 @@ namespace TripSheet_SQLite
                 editItem.Displacement_CE = list_tripSheetData[row].Displacement_CE;
                 if (row == 0)
                 {
-                    // Set line 0 to be all zeroes due to start point.
+                    // Set line 0 to be all zeroed due to start point.
                     CalculateTripData(editItem, null, false);
                     if (list_tripSheetData.Count > 1)
                     {
@@ -379,7 +380,7 @@ namespace TripSheet_SQLite
             TripPlot.Plot.XAxis.Label(tbTimeBased.IsChecked == false ? "m³" : "");
             TripPlot.Plot.YLabel(tbTimeBased.IsChecked == false ? "Depth" : "m³");
             TripPlot.Plot.XAxis.DateTimeFormat(tbTimeBased.IsChecked == false ? false : true);
-            // Intermediate datastorage
+            // Intermediate data storage
             dataLX1 = new List<double>();
             dataLX2 = new List<double>();
             dataLY1 = new List<double>();
@@ -421,7 +422,7 @@ namespace TripSheet_SQLite
             double[] minmaxX = new double[] { dataX1.Min() < dataX2.Min() ? dataX1.Min() : dataX2.Min(), dataX1.Max() > dataX2.Max() ? dataX1.Max() : dataX2.Max() };
             double[] minmaxY = new double[] { dataY1.Min() < dataY2.Min() ? dataY1.Min() : dataY2.Min(), dataY1.Max() > dataY2.Max() ? dataY1.Max() : dataY2.Max() };
 
-            // Plot as timebased or depthbased, and apply limits
+            // Plot as timebase or depthbase, and apply limits
             if (tbTimeBased.IsChecked == false)
             {
                 TripPlot.Plot.AddVerticalLine(0, System.Drawing.Color.Black, 2, LineStyle.Solid);
@@ -447,7 +448,7 @@ namespace TripSheet_SQLite
             MyScatterPlot1 = x1;
             MyScatterPlot2 = x2;
 
-            // HighlightedPoint is for mouseover
+            // HighlightedPoint is for mouse over
             for (int i = 0; i < HighlightedPoint.Count(); i++)
             {
                 HighlightedPoint[i] = AddMarkerPoint(new int[] { 0, 0 }, colors[i], 6, MarkerShape.openCircle, false);
@@ -455,7 +456,7 @@ namespace TripSheet_SQLite
 
             // Draw plot
             TripPlot.Refresh();
-        }// Mouseover method
+        }// Mouse over method
 
         // For ScottPlot highlight.
         private MarkerPlot AddMarkerPoint(int[] xy, System.Drawing.Color color, int markerSize, MarkerShape shape, bool visible)
@@ -469,7 +470,7 @@ namespace TripSheet_SQLite
             return marker;
         }
 
-        // ScottPlot mouseover
+        // ScottPlot mouse over
         private void TripPlot_MouseMove(object sender, MouseEventArgs e)
         {
             string PipeMode1 = RbCE.IsChecked == true ? "Closed Ended" : "Open Ended";

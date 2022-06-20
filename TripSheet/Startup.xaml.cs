@@ -19,7 +19,7 @@ namespace TripSheet_SQLite
 {
     public partial class Startup : Window
     {
-        public static DevEnum DevStatus = DevEnum.RELEASE;
+        public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
 
         // Public variables.
         public static string Version = "v0.82";
@@ -108,7 +108,11 @@ namespace TripSheet_SQLite
         /// </summary>
         private void EnableUI()
         {
-            string connTest = "a"; // GetCDA.dllInstance.GetValueAsString("WELL_ID");
+            string connTest = "";
+            if (DevStatus == DevEnum.DEVELOPMENT)
+                connTest = "test"; 
+            else
+                GetCDA.dllInstance.GetValueAsString("WELL_ID");
             if (connTest == "")
             {
                 Dispatcher.Invoke(() =>
