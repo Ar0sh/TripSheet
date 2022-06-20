@@ -35,10 +35,9 @@ namespace TripSheet_SQLite
         System.Drawing.Color secondaryColorPlot = System.Drawing.Color.Red;
         DataGridCellInfo cellInfo;
         // X, Y, XT(Time X axis) data sets for plot
-        List<double> dataLX1 = new List<double>();
-        List<double> dataLX2 = new List<double>();
-        List<double> dataLY1 = new List<double>();
-        List<double> dataLY2 = new List<double>();
+
+        List<double[]> dataLX;
+        List<double[]> dataLY;
         List<DateTime> dataLXT = new List<DateTime>();
         // Variables used to make points on plot
         double[] dataX1;
@@ -50,13 +49,12 @@ namespace TripSheet_SQLite
         private MarkerPlot[] HighlightedPoint = new MarkerPlot[2];
         System.Drawing.Color[] colors = new System.Drawing.Color[] { System.Drawing.Color.Black, System.Drawing.Color.Orange };
         private int[] LastHighlightedIndex = { -1, -1 };
-        private ScatterPlot MyScatterPlot1;
-        private ScatterPlot MyScatterPlot2;
-        ContextMenu rightClickMenu;
+        //private ScatterPlot MyScatterPlot1;
+        //private ScatterPlot MyScatterPlot2;
+        private ScatterPlot[] MyScatterPlot;
         ObservableCollection<TripSheetData> _New_TripSheetInput = new ObservableCollection<TripSheetData>();
 
         int cellRow;
-        int cellColumn;
         /// <summary>
         /// TripSheetInput dataset, ObservableCollection so it notifies if added, modified or deleted.
         /// </summary>
@@ -381,10 +379,8 @@ namespace TripSheet_SQLite
             TripPlot.Plot.YLabel(tbTimeBased.IsChecked == false ? "Depth" : "m³");
             TripPlot.Plot.XAxis.DateTimeFormat(tbTimeBased.IsChecked == false ? false : true);
             // Intermediate data storage
-            dataLX1 = new List<double>();
-            dataLX2 = new List<double>();
-            dataLY1 = new List<double>();
-            dataLY2 = new List<double>();
+            dataLX = new List<double[]>();
+            dataLY = new List<double[]>();
             dataLXT = new List<DateTime>();
 
             // Add data from database model
@@ -392,29 +388,26 @@ namespace TripSheet_SQLite
             {
                 if (RbCE.IsChecked == true)
                 {
-                    dataLX1.Add(data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0);
-                    dataLX2.Add(data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0);
-                    dataLY1.Add(tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) :
-                        (data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0));
-                    dataLY2.Add(tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) :
-                        (data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0));
+                    dataLX.Add(new double[2] { data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0, data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0 });
+                    dataLY.Add(new double[2] {
+                        tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) : (data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0),
+                        tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) : (data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0)
+                    });
                     dataLXT.Add(DateTimeOffset.FromUnixTimeSeconds(data.Time).UtcDateTime.ToLocalTime());
                     continue;
                 }
-                dataLX1.Add(data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0);
-                dataLX2.Add(data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0);
-                dataLY1.Add(tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) :
-                    (data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0));
-                dataLY2.Add(tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) :
-                    (data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0));
+                dataLX.Add(new double[2] { data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0, data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0 });
+                dataLY.Add(new double[2] {
+                    tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) : (data.TotDiff_OE != null ? (double)data.TotDiff_OE : 0),
+                    tbTimeBased.IsChecked == false ? (data.BDepth != null ? -(double)data.BDepth : 0) : (data.TotDiff_CE != null ? (double)data.TotDiff_CE : 0)});
                 dataLXT.Add(DateTimeOffset.FromUnixTimeSeconds(data.Time).UtcDateTime.ToLocalTime());
             }
 
             // Convert to double array, required by ScottPlot
-            dataX1 = dataLX1.ToArray();
-            dataX2 = dataLX2.ToArray();
-            dataY1 = dataLY1.ToArray();
-            dataY2 = dataLY2.ToArray();
+            dataX1 = dataLX.Select(x => x[0]).ToArray();
+            dataX2 = dataLX.Select(x => x[1]).ToArray();
+            dataY1 = dataLY.Select(x => x[0]).ToArray();
+            dataY2 = dataLY.Select(x => x[1]).ToArray();
             // Convert to OADate for ScottPlot
             dataXT = dataLXT.Select(x => x.ToOADate()).ToArray();
             // Set axis limits based on min/max of data
@@ -434,19 +427,18 @@ namespace TripSheet_SQLite
             }
 
             // MyScatterPlot is the plot used in the XAML component
-            var x2 = TripPlot.Plot.AddScatter(tbTimeBased.IsChecked == false ? dataX2 : dataXT, dataY2);
-            x2.XAxisIndex = 0;
-            x2.Color = secondaryColorPlot;
-            x2.MarkerSize = 1;
-            x2.LineWidth = 1;
-            x2.LineStyle = LineStyle.DashDotDot;
-            var x1 = TripPlot.Plot.AddScatter(tbTimeBased.IsChecked == false ? dataX1 : dataXT, dataY1);
-            x1.XAxisIndex = 0;
-            x1.Color = primaryColorPlot;
-            x1.MarkerSize = 1;
-            x1.LineWidth = 2;
-            MyScatterPlot1 = x1;
-            MyScatterPlot2 = x2;
+            var Scatter1 = TripPlot.Plot.AddScatter(tbTimeBased.IsChecked == false ? dataX1 : dataXT, dataY1);
+            Scatter1.XAxisIndex = 0;
+            Scatter1.Color = primaryColorPlot;
+            Scatter1.MarkerSize = 1;
+            Scatter1.LineWidth = 2;
+            var Scatter2 = TripPlot.Plot.AddScatter(tbTimeBased.IsChecked == false ? dataX2 : dataXT, dataY2);
+            Scatter2.XAxisIndex = 0;
+            Scatter2.Color = secondaryColorPlot;
+            Scatter2.MarkerSize = 1;
+            Scatter2.LineWidth = 1;
+            Scatter2.LineStyle = LineStyle.DashDotDot;
+            MyScatterPlot = new ScatterPlot[2] { Scatter1, Scatter2 };
 
             // HighlightedPoint is for mouse over
             for (int i = 0; i < HighlightedPoint.Count(); i++)
@@ -456,13 +448,12 @@ namespace TripSheet_SQLite
 
             // Draw plot
             TripPlot.Refresh();
-        }// Mouse over method
+        }
 
         // For ScottPlot highlight.
         private MarkerPlot AddMarkerPoint(int[] xy, System.Drawing.Color color, int markerSize, MarkerShape shape, bool visible)
         {
-            MarkerPlot marker = new MarkerPlot();
-            marker = TripPlot.Plot.AddPoint(xy[0], xy[1]);
+            MarkerPlot marker = TripPlot.Plot.AddPoint(xy[0], xy[1]);
             marker.Color = color;
             marker.MarkerSize = markerSize;
             marker.MarkerShape = shape;
@@ -480,8 +471,12 @@ namespace TripSheet_SQLite
 
                 (double mouseCoordX, double mouseCoordY) = TripPlot.GetMouseCoordinates();
                 double xyRatio = TripPlot.Plot.XAxis.Dims.PxPerUnit / TripPlot.Plot.YAxis.Dims.PxPerUnit;
-                (double pointX1, double pointY1, int pointIndex1) = tbTimeBased.IsChecked == true ? MyScatterPlot1.GetPointNearestX(mouseCoordX) : MyScatterPlot1.GetPointNearestY(mouseCoordY);    //(mouseCoordX, mouseCoordY, xyRatio);
-                (double pointX2, double pointY2, int pointIndex2) = tbTimeBased.IsChecked == true ? MyScatterPlot2.GetPointNearestX(mouseCoordX) : MyScatterPlot2.GetPointNearestY(mouseCoordY);    //(mouseCoordX, mouseCoordY, xyRatio);
+                (double pointX1, double pointY1, int pointIndex1) = tbTimeBased.IsChecked == true ? 
+                    MyScatterPlot[0].GetPointNearestX(mouseCoordX) : 
+                    MyScatterPlot[0].GetPointNearestY(mouseCoordY);
+                (double pointX2, double pointY2, int pointIndex2) = tbTimeBased.IsChecked == true ? 
+                    MyScatterPlot[1].GetPointNearestX(mouseCoordX) : 
+                    MyScatterPlot[1].GetPointNearestY(mouseCoordY);
 
                 int[] pointIndex = { pointIndex1, pointIndex2 };
                 double[] pointX = { pointX1, pointX2 };
@@ -567,6 +562,7 @@ namespace TripSheet_SQLite
                 }
                 Startup.sqlSlave.tripSheetModel.SaveChanges();
                 Load_TripData();
+                UpdateSheet(0);
             }
         }
 
@@ -669,7 +665,6 @@ namespace TripSheet_SQLite
                     cellInfo = dgTripData.SelectedCells[0];
                 }
                 catch { }
-                //cellColumn = cellInfo.Column.DisplayIndex;
                 cellRow = dgTripData.Items.IndexOf(cellInfo.Item);
                 Edit = false;
                 dgTripData.CommitEdit();
