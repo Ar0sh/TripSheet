@@ -32,7 +32,14 @@ namespace Calculations
         }
         public decimal? GainLossTime(decimal? VolumeDiff, int? TimeDiff)
         {
-            if (VolumeDiff != null && TimeDiff != null) return (VolumeDiff / TimeDiff) * 60 * 60;
+            try
+            {
+                if (VolumeDiff != null && TimeDiff != null) return (VolumeDiff / TimeDiff) * 60 * 60;
+            }
+            catch
+            {
+                return 0;
+            }
             return null;
         }
     }

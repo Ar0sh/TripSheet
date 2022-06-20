@@ -49,8 +49,6 @@ namespace TripSheet_SQLite
         private MarkerPlot[] HighlightedPoint = new MarkerPlot[2];
         System.Drawing.Color[] colors = new System.Drawing.Color[] { System.Drawing.Color.Black, System.Drawing.Color.Orange };
         private int[] LastHighlightedIndex = { -1, -1 };
-        //private ScatterPlot MyScatterPlot1;
-        //private ScatterPlot MyScatterPlot2;
         private ScatterPlot[] MyScatterPlot;
         ObservableCollection<TripSheetData> _New_TripSheetInput = new ObservableCollection<TripSheetData>();
 
@@ -548,6 +546,7 @@ namespace TripSheet_SQLite
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             IList<DataGridCellInfo> selected = dgTripData.SelectedCells;
+            var firstCell = dgTripData.Items.IndexOf(selected[0].Item) == dgTripData.Items.Count - 1 ? 0 : dgTripData.Items.IndexOf(selected[0].Item);
             List<TripSheetData> input = new List<TripSheetData>();
             if (selected.Count > 0)
             {
@@ -562,7 +561,7 @@ namespace TripSheet_SQLite
                 }
                 Startup.sqlSlave.tripSheetModel.SaveChanges();
                 Load_TripData();
-                UpdateSheet(0);
+                UpdateSheet(firstCell == 0 ? 0 : firstCell - 1);
             }
         }
 
