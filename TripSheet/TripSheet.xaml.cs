@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Diagnostics;
 using System.Windows.Controls.Primitives;
+using System.Text.RegularExpressions;
 
 namespace TripSheet_SQLite
 {
@@ -165,19 +166,17 @@ namespace TripSheet_SQLite
         // Changed selection of pipe in combobox trigger
         private void CbPipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            PipeData selectedPipe = (PipeData)(sender as ComboBox).SelectedItem;
             if (RbPipe.IsChecked == true)
             {
-                CheckPipe(selectedPipe);
+                CheckPipe((PipeData)(sender as ComboBox).SelectedItem);
             }
         }
         // Changed selection of casing in combobox trigger
         private void CbCsg_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CsgData selectedCsg = (CsgData)(sender as ComboBox).SelectedItem;
             if (RbCsg.IsChecked == true)
             {
-                CheckCasing(selectedCsg);
+                CheckCasing((CsgData)(sender as ComboBox).SelectedItem);
             }
         }
         // Load trip table data
@@ -303,7 +302,7 @@ namespace TripSheet_SQLite
         private void SaveToSql(int row = -1, bool firstLineEdit = false)
         {
             List<TripSheetData> list_tripSheetData = New_TripSheetInput.OrderBy(des => des.Time).ToList();
-            while(row != -1)
+            while (row != -1)
             {
                 var id = list_tripSheetData[row].Id;
                 var editItem = Startup.sqlSlave.tripSheetModel.TripSheetData.FirstOrDefault(item => item.Id == id);
@@ -469,11 +468,11 @@ namespace TripSheet_SQLite
 
                 (double mouseCoordX, double mouseCoordY) = TripPlot.GetMouseCoordinates();
                 double xyRatio = TripPlot.Plot.XAxis.Dims.PxPerUnit / TripPlot.Plot.YAxis.Dims.PxPerUnit;
-                (double pointX1, double pointY1, int pointIndex1) = tbTimeBased.IsChecked == true ? 
-                    MyScatterPlot[0].GetPointNearestX(mouseCoordX) : 
+                (double pointX1, double pointY1, int pointIndex1) = tbTimeBased.IsChecked == true ?
+                    MyScatterPlot[0].GetPointNearestX(mouseCoordX) :
                     MyScatterPlot[0].GetPointNearestY(mouseCoordY);
-                (double pointX2, double pointY2, int pointIndex2) = tbTimeBased.IsChecked == true ? 
-                    MyScatterPlot[1].GetPointNearestX(mouseCoordX) : 
+                (double pointX2, double pointY2, int pointIndex2) = tbTimeBased.IsChecked == true ?
+                    MyScatterPlot[1].GetPointNearestX(mouseCoordX) :
                     MyScatterPlot[1].GetPointNearestY(mouseCoordY);
 
                 int[] pointIndex = { pointIndex1, pointIndex2 };
@@ -514,6 +513,7 @@ namespace TripSheet_SQLite
             }
         }
 
+        // Add a new row to table, and run calculations on it.
         private void BtnNewLine_Click(object sender, RoutedEventArgs e)
         {
             New_TripSheetInput.Add(new TripSheetData()
@@ -525,8 +525,6 @@ namespace TripSheet_SQLite
             });
             UpdateSheet();
         }
-
-
 
         private void BtnAddPipe_Click(object sender, RoutedEventArgs e)
         {
@@ -542,7 +540,7 @@ namespace TripSheet_SQLite
             Load_CsgData();
         }
 
-
+        // Context menu in table to delete row, which will delete it from SQL as well.
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             IList<DataGridCellInfo> selected = dgTripData.SelectedCells;
@@ -573,6 +571,7 @@ namespace TripSheet_SQLite
             }
         }
 
+        // Can change what data to show as primary and in table.
         private void RbOpenEnded_Checked(object sender, RoutedEventArgs e)
         {
             ChangeColumns(Visibility.Visible, Visibility.Hidden, primaryColor, secondaryColor, "Open Ended", "Closed Ended");
@@ -591,6 +590,7 @@ namespace TripSheet_SQLite
         }
         private void ChangeColumns(Visibility VisOpenEnded, Visibility VisClosedEnded, Brush ColOpenEnded, Brush ColClosedEnded, string primary, string secondary)
         {
+            // Change dgTripData table to show Open Ended or Close Ended data by show/hide columns
             int[] arr = { 4, 7, 9, 11, 13 };
             for (int i = 4; i <= 14; i++)
             {
@@ -599,6 +599,7 @@ namespace TripSheet_SQLite
                 else if (i != 6)
                     dgTripData.Columns[i].Visibility = VisClosedEnded;
             }
+            // Change colors to match selected choice
             tbOE.BorderBrush = ColOpenEnded;
             tbCE.BorderBrush = ColClosedEnded;
             RbOE.Foreground = ColOpenEnded;
@@ -611,8 +612,7 @@ namespace TripSheet_SQLite
 
         private void RbPipe_Checked(object sender, RoutedEventArgs e)
         {
-            PipeData selectedPipe = (PipeData)cbPipe.SelectedItem;
-            CheckPipe(selectedPipe);
+            CheckPipe((PipeData)cbPipe.SelectedItem);
         }
 
         private void CheckPipe(PipeData selectedPipe)
@@ -634,8 +634,7 @@ namespace TripSheet_SQLite
 
         private void RbCsg_Checked(object sender, RoutedEventArgs e)
         {
-            CsgData selectedCsg = (CsgData)cbCsg.SelectedItem;
-            CheckCasing(selectedCsg);
+            CheckCasing((CsgData)cbCsg.SelectedItem);
         }
 
         private void CheckCasing(CsgData selectedCsg)
@@ -657,8 +656,24 @@ namespace TripSheet_SQLite
 
         private void DgTripData_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            if (Edit == true)
+            bool isAllowed = false;
+            if (e.EditingElement is TextBox editingEle)
             {
+                // Check if user entered a bit too many dots or commas and correct it, and replace commas with dots
+                (e.EditingElement as TextBox).Text = Regex.Replace((e.EditingElement as TextBox).Text, @"\,+", ".");
+                (e.EditingElement as TextBox).Text = Regex.Replace((e.EditingElement as TextBox).Text, @"\.+", ".");
+                // Check input, only allow 0-9.,
+                isAllowed = editingEle.Text.Trim(' ') == "" ? false :
+                    editingEle.Text.Count(c => c == '.') > 1 ? false :
+                    IsTextAllowed(editingEle.Text.Trim(' '), @"[^0-9.,]");
+                // If input check fails, disable the possibility to add new line. input textbox will also be red, indicating wrong input.
+                // Button will be enabled if input is OK again.
+                btnNewLine.IsEnabled = isAllowed ? true : false;
+            }
+            if (Edit == true && isAllowed)
+            {
+                // Commit edit and udate sheet with new calculations
+                // Try catch and edit flag due to CommitEdit triggers DataGridCellEditEndingEventArgs
                 try
                 {
                     cellInfo = dgTripData.SelectedCells[0];
@@ -692,6 +707,19 @@ namespace TripSheet_SQLite
         private void MnuHelp_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(Directory.GetCurrentDirectory() + "\\Help\\TripSheet.pdf");
+        }
+
+        private static bool IsTextAllowed(string Text, string AllowedRegex)
+        {
+            try
+            {
+                var regex = new Regex(AllowedRegex);
+                return !regex.IsMatch(Text);
+            }
+            catch
+            {
+                return true;
+            }
         }
     }
 }

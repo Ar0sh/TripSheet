@@ -70,11 +70,9 @@
                         <Setter Property="HorizontalAlignment" Value="Right"/>
                     </Style>
                     <Style x:Key="errorStyle" TargetType="{x:Type TextBox}">
-                        <Setter Property="Padding" Value="-2"/>
                         <Style.Triggers>
                             <Trigger Property="Validation.HasError" Value="True">
                                 <Setter Property="Background" Value="Red"/>
-                                <Setter Property="BorderThickness" Value="0"/>
                                 <Setter Property="ToolTip" 
                                             Value="{Binding RelativeSource={RelativeSource Self},
                                             Path=(Validation.Errors)[0].ErrorContent}"/>
@@ -144,21 +142,21 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn x:Name="colTime" Width="150" Header="Time" IsReadOnly="True" 
                                     Binding="{Binding Time, Converter={StaticResource dateConverter}}"/>
-                    <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)" 
+                    <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)"
                                     EditingElementStyle="{StaticResource errorStyle}" ElementStyle="{StaticResource tbStyle}"
-                                    Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat='0.00'}"
+                                    Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat={}{0:n2}}"
                                     CellStyle="{StaticResource EditableCells}"/>
-                    <DataGridTextColumn x:Name="colTripVol" Width="100"  Header="Trip Vol.(m³)" 
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, StringFormat='0.00'}"
+                    <DataGridTextColumn x:Name="colTripVol" Width="100"  Header="Trip Vol.(m³)" EditingElementStyle="{StaticResource errorStyle}"
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, ValidatesOnExceptions=True, StringFormat={}{0:n2}}"
                                     CellStyle="{StaticResource EditableCells}"/>
-                    <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" 
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, StringFormat='0.00'}" 
+                    <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" EditingElementStyle="{StaticResource errorStyle}"
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, ValidatesOnExceptions=True,StringFormat={}{0:n2}}" 
                                     CellStyle="{StaticResource EditableCells}"/>
-                    <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" 
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, StringFormat='0.00'}" 
+                    <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" EditingElementStyle="{StaticResource errorStyle}"
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, ValidatesOnExceptions=True,StringFormat={}{0:n2}}" 
                                     CellStyle="{StaticResource EditableCells}"/>
-                    <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" 
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, StringFormat='0.00'}"
+                    <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" EditingElementStyle="{StaticResource errorStyle}"
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, ValidatesOnExceptions=True, StringFormat={}{0:n2}}"
                                      CellStyle="{StaticResource EditableCells}"/>
                     <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding ActualVolume, StringFormat='0.00 m³'}"/>
@@ -208,8 +206,6 @@
         </Grid>
         <Grid  Grid.Column="2" Grid.RowSpan="2">
             <WpfPlot Name="TripPlot" MouseMove="TripPlot_MouseMove" Margin="0,0,0,42" />
-            <!--<Label x:Name="lbMouseover1" Content="Primary: " Margin="5,0,10,36" Height="26" VerticalAlignment="Bottom"/>-->
-            <!--<Label x:Name="lbMouseover2" Content="Secondary: " Margin="5,0,10,10" Height="26" VerticalAlignment="Bottom"/>-->
             <StatusBar Height="22" VerticalAlignment="Bottom" Margin="0,0,0,20" Background="{x:Null}" BorderThickness="0,1,0,0" BorderBrush="LightGray">
                 <TextBlock x:Name="lbMouseover1" Text="Primary: " VerticalAlignment="Center"/>
             </StatusBar>
