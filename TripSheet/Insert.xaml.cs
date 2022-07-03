@@ -60,6 +60,11 @@ namespace TripSheet_SQLite
             RowData = rowData;
             Load_PipeData();
             PopulateBoxes(pipeData, csgData);
+            if(cbCsg.Items.Count == 0)
+            {
+                cbCsg.IsEnabled = false;
+                RbCsg.IsEnabled = false;
+            }
         }
 
         // Load pipe and casing displacements
