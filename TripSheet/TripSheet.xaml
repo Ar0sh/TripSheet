@@ -123,6 +123,7 @@
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="IsTabStop" Value="True" />
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#FFE06363"/>
@@ -144,19 +145,19 @@
                                     Binding="{Binding Time, Converter={StaticResource dateConverter}}"/>
                     <DataGridTextColumn x:Name="colBDepth" Width="90" Header="Bit Depth(m)"
                                     EditingElementStyle="{StaticResource errorStyle}" ElementStyle="{StaticResource tbStyle}"
-                                    Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat={}{0:n2}}"
+                                    Binding="{Binding BDepth, ValidatesOnExceptions=True, StringFormat={}{0:F2}}"
                                     CellStyle="{StaticResource EditableCells}"/>
                     <DataGridTextColumn x:Name="colTripVol" Width="100"  Header="Trip Vol.(m³)" EditingElementStyle="{StaticResource errorStyle}"
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, ValidatesOnExceptions=True, StringFormat={}{0:n2}}"
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding TripVolume, ValidatesOnExceptions=True, StringFormat={}{0:F2}}"
                                     CellStyle="{StaticResource EditableCells}"/>
                     <DataGridTextColumn x:Name="colEmptyFill" Width="115" Header="Empty(-)/Fill(+)(m³)" EditingElementStyle="{StaticResource errorStyle}"
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, ValidatesOnExceptions=True,StringFormat={}{0:n2}}" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding EmptyFill, ValidatesOnExceptions=True,StringFormat={}{0:F2}}" 
                                     CellStyle="{StaticResource EditableCells}"/>
                     <DataGridTextColumn x:Name="colDisplacement_OE" Width="auto" Header="Disp.(l/m)" EditingElementStyle="{StaticResource errorStyle}"
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, ValidatesOnExceptions=True,StringFormat={}{0:n2}}" 
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_OE, ValidatesOnExceptions=True,StringFormat={}{0:F2}}" 
                                     CellStyle="{StaticResource EditableCells}"/>
                     <DataGridTextColumn x:Name="colDisplacement_CE" Width="auto" Header="Disp.(l/m)" EditingElementStyle="{StaticResource errorStyle}"
-                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, ValidatesOnExceptions=True, StringFormat={}{0:n2}}"
+                                    ElementStyle="{StaticResource tbStyle}" Binding="{Binding Displacement_CE, ValidatesOnExceptions=True, StringFormat={}{0:F2}}"
                                      CellStyle="{StaticResource EditableCells}"/>
                     <DataGridTextColumn x:Name="colActual" Width="60" Header="Act. Vol." IsReadOnly="True" 
                                     ElementStyle="{StaticResource tbStyle}" Binding="{Binding ActualVolume, StringFormat='0.00 m³'}"/>
@@ -175,10 +176,12 @@
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="Insert" Click="MenuInsert_Click"/>
+                        <Span />
                         <MenuItem Header="Copy" Command="Copy"/>
                         <MenuItem Header="Paste" Command="Paste"/>
                         <MenuItem Header="Cut" Command="Cut"/>
-                        <Span/>
+                        <Span />
                         <MenuItem Header="Delete" Click="Delete_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>

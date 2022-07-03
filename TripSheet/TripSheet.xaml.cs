@@ -154,13 +154,13 @@ namespace TripSheet_SQLite
         // Load drill pipe table data
         private void Load_PipeData()
         {
-            pipeList = Startup.sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.Name).ToList();
+            pipeList = Startup.sqlSlave.tripSheetModel.PipeData.OrderBy(a => a.CEDisplacement).ToList();
             cbPipe.ItemsSource = pipeList;
         }
         // Load casing table data
         private void Load_CsgData()
         {
-            csgList = Startup.sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.Name).ToList();
+            csgList = Startup.sqlSlave.tripSheetModel.CsgData.OrderBy(a => a.CEDisplacement).ToList();
             cbCsg.ItemsSource = csgList;
         }
         // Changed selection of pipe in combobox trigger
@@ -239,7 +239,7 @@ namespace TripSheet_SQLite
         }
 
         // Update trip data table
-        private void UpdateSheet(int row = -1)
+        private void UpdateSheet(int row = -1, bool insert = false)
         {
             int k = dgTripData.Items.Count;
             TripSheetData tnew = (TripSheetData)dgTripData.Items[k - 1];
@@ -263,7 +263,23 @@ namespace TripSheet_SQLite
                     tnew.TotDiff_CE = 0.00M;
                     Startup.sqlSlave.tripSheetModel.TripSheetData.Add(tnew);
                 }
-                if (tnew.Id == null && tnew.TripVolume != null && tnew.BDepth != 0 && tbefore != null)
+                else if (insert == true)
+                {
+                    tnew.Id = Guid.NewGuid().ToString();
+                    tnew.SheetId = SheetGuid;
+                    tnew.ActualVolume = volumes.ActualVolume(tnew.TripVolume, tbefore.TripVolume, tnew.EmptyFill);
+                    tnew.TheoreticalVol_OE = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbOE.Text));
+                    tnew.TheoreticalVol_CE = volumes.TheoreticalVol(tnew.BDepth, tbefore.BDepth, Convert.ToDecimal(tbCE.Text));
+                    tnew.Diff_OE = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_OE);
+                    tnew.Diff_CE = volumes.Subtract(tnew.ActualVolume, tnew.TheoreticalVol_CE);
+                    tnew.TotDiff_OE = volumes.Addition(tbefore.TotDiff_OE, tnew.Diff_OE);
+                    tnew.TotDiff_CE = volumes.Addition(tbefore.TotDiff_CE, tnew.Diff_CE);
+                    tnew.TimeDiffMin = (int)(tnew.Time - tbefore.Time);
+                    tnew.LossGainRate_OE = volumes.GainLossTime(tnew.Diff_OE, tnew.TimeDiffMin);
+                    tnew.LossGainRate_CE = volumes.GainLossTime(tnew.Diff_CE, tnew.TimeDiffMin);
+                    Startup.sqlSlave.tripSheetModel.TripSheetData.Add(tnew);
+                }
+                else if (tnew.Id == null && tnew.TripVolume != null && tnew.BDepth != 0 && tbefore != null)
                 {
                     tnew.Id = Guid.NewGuid().ToString();
                     tnew.SheetId = SheetGuid;
@@ -302,6 +318,7 @@ namespace TripSheet_SQLite
         private void SaveToSql(int row = -1, bool firstLineEdit = false)
         {
             List<TripSheetData> list_tripSheetData = New_TripSheetInput.OrderBy(des => des.Time).ToList();
+            Startup.sqlSlave.tripSheetModel.SaveChanges();
             while (row != -1)
             {
                 var id = list_tripSheetData[row].Id;
@@ -513,17 +530,45 @@ namespace TripSheet_SQLite
             }
         }
 
+        public void NewLine(long time = 0,
+            decimal? bdepth = 0,
+            decimal? tripvol = 0,
+            decimal? emptyfill = 0,
+            decimal? dispOE = 0,
+            decimal? dispCE = 0,
+            string pipeid = "",
+            bool insert = false)
+        {
+            if (!insert)
+            {
+                New_TripSheetInput.Add(new TripSheetData()
+                {
+                    Time = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    BDepth = Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("BITDEP")), 2),
+                    TripVolume = Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("TRIPPVT")), 2),
+                    EmptyFill = 0.00M
+                });
+                UpdateSheet();
+                return;
+            }
+            New_TripSheetInput.Add(new TripSheetData()
+            {
+                Time = time,
+                BDepth = bdepth,
+                TripVolume = tripvol,
+                EmptyFill = emptyfill,
+                Displacement_CE = dispCE,
+                Displacement_OE = dispOE,
+                PipeId = pipeid
+            });
+            UpdateSheet(0, true);
+
+        }
+
         // Add a new row to table, and run calculations on it.
         private void BtnNewLine_Click(object sender, RoutedEventArgs e)
         {
-            New_TripSheetInput.Add(new TripSheetData()
-            {
-                Time = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                BDepth = Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("BITDEP")), 2),
-                TripVolume = Math.Round(Convert.ToDecimal(Startup.GetCDA.GetValue("TRIPPVT")), 2),
-                EmptyFill = 0.00M
-            });
-            UpdateSheet();
+            NewLine();
         }
 
         private void BtnAddPipe_Click(object sender, RoutedEventArgs e)
@@ -563,6 +608,21 @@ namespace TripSheet_SQLite
             }
         }
 
+        // Context menu in table to insert a new line, a new Insert window will pop up.
+        private void MenuInsert_Click(object sender, RoutedEventArgs e)
+        {
+            TripSheetData item = new TripSheetData();
+            try
+            {
+                item = (TripSheetData)dgTripData.SelectedCells[0].Item;
+            }
+            catch
+            {
+
+            }
+
+            InsertLine(item, (PipeData)cbPipe.SelectedItem, (CsgData)cbCsg.SelectedItem);
+        }
         private void TbTimeBased_Checked(object sender, RoutedEventArgs e)
         {
             if (Startup.sqlSlave.tripSheetModel.TripSheetData.Count() != 0)
@@ -688,6 +748,25 @@ namespace TripSheet_SQLite
             Edit = true;
         }
 
+        // Create Insert window, send data needed to window and receive data when saved.
+        private void InsertLine(TripSheetData data, PipeData pipeData, CsgData csgData)
+        {
+            Insert insert = new Insert(data, pipeData, csgData);
+            insert.ShowDialog();
+            if (insert.Saved == true)
+            {
+                NewLine(insert.Time,
+                    insert.BitDepth,
+                    insert.TripVolume,
+                    insert.EmptyFill,
+                    insert.Displacement_OE,
+                    insert.Displacement_CE,
+                    insert.PipeId,
+                    true);
+                Load_TripData();
+            }
+        }
+
         private void MnuExit_Click(object sender, RoutedEventArgs e)
         {
             Close();
@@ -721,5 +800,6 @@ namespace TripSheet_SQLite
                 return true;
             }
         }
+
     }
 }

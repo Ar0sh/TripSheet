@@ -1,0 +1,78 @@
+﻿<Window x:Class="TripSheet_SQLite.Insert"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:local="clr-namespace:TripSheet_SQLite"
+        mc:Ignorable="d"
+        Title="Insert" Height="288" Width="300" SizeToContent="WidthAndHeight" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <local:InputBinds x:Key="inputbinds" />
+        <Style x:Key="tbError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="BorderThickness" Value="2"/>
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                            Path=(Validation.Errors)/ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Label Content="Time:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <WindowsFormsHost Margin="127,10,10,0" Grid.Row="0" Height="25" VerticalAlignment="Top">
+            <wf:DateTimePicker x:Name="dtDateTime" Format="Custom"  CustomFormat="dd/MM/yyyy HH:mm:ss" ShowUpDown="True"/>
+        </WindowsFormsHost>
+        <Label Content="Bit Depth:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbBitDep" Height="23" Margin="127,41,10,0" VerticalContentAlignment="Center" 
+                 TextWrapping="Wrap" VerticalAlignment="Top"
+                 Style="{StaticResource tbError}" PreviewKeyDown="CommaCheck_PreviewKeyDown">
+            <TextBox.Text>
+                <Binding Path="BitDepth" Source="{StaticResource inputbinds}" StringFormat="{}{0:F2}" UpdateSourceTrigger="Explicit">
+                    <Binding.ValidationRules>
+                        <local:DecimalRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <Label Content="Trip Volume:" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbTripVol" Height="23" Margin="127,72,10,0" VerticalContentAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top"
+                 Style="{StaticResource tbError}" PreviewKeyDown="CommaCheck_PreviewKeyDown">
+            <TextBox.Text>
+                <Binding Path="TripVolume" Source="{StaticResource inputbinds}" StringFormat="{}{0:F2}" UpdateSourceTrigger="Explicit">
+                    <Binding.ValidationRules>
+                        <local:DecimalRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <Label Content="Empty(+)/Fill(-):" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbEmpFill" Height="23" Margin="127,103,10,0" VerticalContentAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top"
+                 Style="{StaticResource tbError}" PreviewKeyDown="CommaCheck_PreviewKeyDown">
+            <TextBox.Text>
+                <Binding Path="EmptyFill" Source="{StaticResource inputbinds}" StringFormat="{}{0:F2}" UpdateSourceTrigger="Explicit">
+                    <Binding.ValidationRules>
+                        <local:DecimalRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <Label Content="Pipe:" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lbError" HorizontalContentAlignment="Center" Margin="10,196,10,0" VerticalAlignment="Top" Height="27"/>
+        <ComboBox TabIndex="4" x:Name="cbPipe" Margin="127,134,10,0" 
+                  ItemsSource="{Binding pipeList}"
+                  DisplayMemberPath="Name" Height="25" VerticalAlignment="Top"/>
+        <Button Content="Save &amp; Exit" Click="Save_Click" Margin="10,228,0,10" HorizontalAlignment="Left" Width="154"/>
+        <Button Content="Cancel" Click="Exit_Click" Margin="0,228,10,10" HorizontalAlignment="Right" Width="115"/>
+        <Label Content="Casing:" HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top"/>
+        <ComboBox TabIndex="5" x:Name="cbCsg" Margin="127,165,10,0" 
+            ItemsSource="{Binding csgList}"
+            DisplayMemberPath="Name" Height="25" VerticalAlignment="Top"/>
+        <RadioButton x:Name="RbPipe" HorizontalAlignment="Left" Margin="107,134,0,0" IsChecked="True" VerticalContentAlignment="Center" VerticalAlignment="Top" Height="25"/>
+        <RadioButton x:Name="RbCsg" HorizontalAlignment="Left" Margin="107,164,0,0" VerticalContentAlignment="Center" VerticalAlignment="Top" Height="25"/>
+        <Button Content="Save &amp; Exit" Click="Save_Click" Margin="10,228,130,10"/>
+    </Grid>
+</Window>
