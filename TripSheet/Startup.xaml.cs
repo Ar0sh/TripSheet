@@ -22,7 +22,7 @@ namespace TripSheet_SQLite
         public static DevEnum DevStatus = DevEnum.DEVELOPMENT;
 
         // Public variables.
-        public static string Version = "v0.82";
+        public static string Version = "v0.97";
         public static CDAconn GetCDA;
         public static dynamic dllInstance;
         public static SQLSlave sqlSlave;

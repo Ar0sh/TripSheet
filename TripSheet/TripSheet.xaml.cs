@@ -727,9 +727,10 @@ namespace TripSheet_SQLite
                 (e.EditingElement as TextBox).Text = Regex.Replace((e.EditingElement as TextBox).Text, @"\,+", ".");
                 (e.EditingElement as TextBox).Text = Regex.Replace((e.EditingElement as TextBox).Text, @"\.+", ".");
                 // Check input, only allow 0-9.,
-                isAllowed = editingEle.Text.Trim(' ') == "" ? false :
+                isAllowed = editingEle.Text.Trim(' ') == "." ? false :
+                    editingEle.Text.Contains(' ') ? false :
                     editingEle.Text.Count(c => c == '.') > 1 ? false :
-                    IsTextAllowed(editingEle.Text.Trim(' '), @"[^0-9.,]");
+                    IsTextAllowed(editingEle.Text.Trim(' '), @"[^0-9.,-]");
                 // If input check fails, disable the possibility to add new line. input textbox will also be red, indicating wrong input.
                 // Button will be enabled if input is OK again.
                 btnNewLine.IsEnabled = isAllowed ? true : false;
