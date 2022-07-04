@@ -20,4 +20,4 @@
 <img src="https://user-images.githubusercontent.com/73751609/174132726-f17ef09d-e0c1-48fe-8447-ce549a99513f.png">
 
 <p>Insert line validation error</p>
-<img src="https://user-images.githubusercontent.com/73751609/177060185-62869d30-3bb8-4c35-9787-12af9a3705f9.png">
+<img src="https://user-images.githubusercontent.com/73751609/177060329-57646f0a-8350-4016-92b8-f017b709f28d.png">
