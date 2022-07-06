@@ -55,7 +55,7 @@
         </Grid>
         <Grid  Grid.Column="0" Grid.Row="1">
             <DataGrid TabIndex="10" x:Name="dgTripData"
-                        ItemsSource="{Binding New_TripSheetInput}"
+                        ItemsSource="{Binding New_TripSheetInput, Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
                         SelectedItem="{Binding SelectedItem, ElementName=dgTripData, Mode=TwoWay}"
                         CanUserAddRows="False"
                         CanUserDeleteRows="True"
